@@ -1,0 +1,129 @@
+---
+title: "Episode 2 — Version Control with Git"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Initialize a repository and record snapshots with meaningful commits.
+- Read history and inspect what changed.
+- Use branches to develop a feature safely.
+- Collaborate via a remote and a pull request.
+
+**Teaching:** 40 min · **Exercises:** 25 min
+:::
+
+## Why version control?
+
+Robotics configs and code change constantly — and a bad change can crash hardware. Git lets
+you record every change, understand who changed what and why, experiment on branches, and
+collaborate without overwriting each other. It is also the backbone of CI/CD (Episode on
+pipelines) and reproducible research.
+
+## Starting a repo (live coding)
+
+```bash
+mkdir nav-tuning && cd nav-tuning
+git init
+git status
+```
+
+Configure your identity once (per machine):
+
+```bash
+git config --global user.name  "Your Name"
+git config --global user.email "you@example.com"
+```
+
+## The add → commit cycle
+
+```bash
+echo "max_speed: 1.5" > nav.yaml
+git status                       # untracked
+git add nav.yaml                 # stage
+git commit -m "Add initial nav config"
+git log --oneline
+```
+
+::: {.callout-tip}
+## Instructor note
+Draw the three areas — working directory → staging area → repository — on screen or in the
+notes. The staging area is the most common point of confusion; revisit it after the first
+challenge.
+:::
+
+Make a change and see the diff:
+
+```bash
+echo "max_accel: 0.8" >> nav.yaml
+git diff                         # what changed since last commit
+git add nav.yaml
+git commit -m "Add acceleration limit"
+```
+
+::: {.callout-note collapse="true"}
+## Challenge 1 — Tell the story
+Write a one-line commit that would help a teammate six months from now. Which is better, and
+why?
+
+- `git commit -m "fix"`
+- `git commit -m "Lower max_speed to 1.0 after lab collision on 2026-06-20"`
+
+### Solution
+The second. Good commit messages explain *why*, not just *what*. Future-you and your
+teammates read history to understand decisions, especially after an incident.
+:::
+
+## Branching for safe experiments
+
+Never tune a live robot on `main`. Branch:
+
+```bash
+git switch -c faster-turns
+echo "max_turn_rate: 2.0" >> nav.yaml
+git commit -am "Increase turn rate for tight corridors"
+git switch main                  # main is untouched
+git log --oneline --graph --all
+```
+
+Merge when you're happy:
+
+```bash
+git merge faster-turns
+```
+
+## Collaborating with a remote
+
+```bash
+# After creating an empty repo on GitHub:
+git remote add origin https://github.com/you/nav-tuning.git
+git push -u origin main
+```
+
+The collaborative workflow: **fork → branch → commit → push → pull request → review → merge.**
+This is exactly how you'll contribute to ForgeLab lessons (see
+[CONTRIBUTING](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/CONTRIBUTING.md)).
+
+::: {.callout-note collapse="true"}
+## Challenge 2 — Recover from a mistake
+You edited `nav.yaml` with a bad value but haven't committed. How do you discard the change and
+get back the last committed version?
+
+### Solution
+
+```bash
+git restore nav.yaml      # discard unstaged changes to this file
+```
+If you already staged it: `git restore --staged nav.yaml` first, then `git restore nav.yaml`.
+:::
+
+::: {.callout-important}
+## Key points
+- Commit small, logical changes with messages that explain *why*.
+- `git diff` and `git log` let you read history and changes.
+- Branches isolate risky work — keep `main` deployable.
+- The fork/PR workflow is how teams collaborate and how CI gets triggered.
+:::
+
+Next: [Episode 3 — Robot navigation with ROS 2](03-ros2-navigation.qmd).

@@ -1,0 +1,133 @@
+---
+title: "Episode 1 — The Unix Shell for Roboticists"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Navigate a filesystem from the shell (`pwd`, `ls`, `cd`).
+- Create, inspect, and organize files and directories.
+- Chain commands with pipes to inspect robot log data.
+- Write and run a tiny Bash script.
+
+**Teaching:** 35 min · **Exercises:** 20 min
+:::
+
+## Why the shell?
+
+Robots are headless. When you SSH into a drone, a rover, or a cloud GPU node, there is no
+desktop — only a shell. The shell is also how you automate: one script can launch a sim,
+record data, and shut down cleanly. We start here because everything else builds on it.
+
+## Where am I? (live coding)
+
+```bash
+pwd                 # print working directory
+ls                  # what's here?
+ls -lah             # long listing, all files, human-readable sizes
+cd ~                # go home
+cd -                # go back to previous directory
+```
+
+::: {.callout-tip}
+## Instructor note
+Have learners run each command and report what they see in the collaborative notes. Watch for
+Windows users whose paths look different — confirm they are in WSL, not PowerShell.
+:::
+
+## Making structure
+
+Suppose we're starting a robotics project. Let's lay out folders:
+
+```bash
+mkdir -p rover/{logs,configs,scripts}
+cd rover
+ls -R                 # recursive view of the tree
+```
+
+Create a config file and check it:
+
+```bash
+echo "max_speed: 1.5" > configs/nav.yaml
+cat configs/nav.yaml
+```
+
+## Inspecting log data with pipes
+
+Pipes (`|`) send one command's output into the next. This is the heart of shell power.
+Let's make a fake sensor log and analyze it:
+
+```bash
+printf 'ts,range\n1,0.9\n2,0.4\n3,0.2\n4,0.8\n' > logs/lidar.csv
+cat logs/lidar.csv
+```
+
+Count lines, find close-range readings, sort them:
+
+```bash
+wc -l logs/lidar.csv                 # how many lines?
+grep -v "^ts" logs/lidar.csv | sort -t, -k2 -n | head -1   # smallest range reading
+```
+
+::: {.callout-note collapse="true"}
+## Challenge 1 — Find the danger frames
+A reading below `0.5` means an obstacle is close. Using `grep`, `awk`, or `sort`, print only
+the rows of `logs/lidar.csv` where `range < 0.5`.
+
+### Solution
+
+```bash
+awk -F, 'NR>1 && $2 < 0.5 {print}' logs/lidar.csv
+# 2,0.4
+# 3,0.2
+```
+:::
+
+## A tiny script
+
+Automation = put commands in a file. Create `scripts/summary.sh`:
+
+```bash
+cat > scripts/summary.sh <<'EOF'
+#!/usr/bin/env bash
+# Print the number of readings and the closest range in a lidar CSV.
+set -euo pipefail
+file="$1"
+echo "Readings: $(( $(wc -l < "$file") - 1 ))"
+echo "Closest:  $(awk -F, 'NR>1{print $2}' "$file" | sort -n | head -1)"
+EOF
+chmod +x scripts/summary.sh
+./scripts/summary.sh logs/lidar.csv
+```
+
+::: {.callout-tip}
+## Instructor note
+`set -euo pipefail` is a habit worth teaching early: exit on error, on unset variables, and on
+failed pipes. Robotics scripts that fail silently cause real-world crashes.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge 2 — Make it reusable
+Modify `summary.sh` so that if no file argument is given, it prints a usage message and exits
+with a non-zero status. (Hint: `if [ -z "${1:-}" ]; then ...; fi`.)
+
+### Solution
+
+```bash
+if [ -z "${1:-}" ]; then
+  echo "usage: summary.sh <lidar.csv>" >&2
+  exit 1
+fi
+```
+:::
+
+::: {.callout-important}
+## Key points
+- The shell is how you operate and automate real robots and cloud nodes.
+- `pwd`/`ls`/`cd` navigate; `mkdir`/`cat`/`echo` create and inspect.
+- Pipes compose small tools into powerful one-liners.
+- A script is just commands in a file; `set -euo pipefail` makes it safe.
+:::
+
+Next: [Episode 2 — Version control with Git](02-git-version-control.qmd).

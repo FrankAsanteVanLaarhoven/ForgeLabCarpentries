@@ -1,0 +1,70 @@
+---
+title: "Reference / Cheat Sheet"
+---
+
+Keep this page open during the workshop. Grouped by track.
+
+## Unix / Bash
+
+| Command | Does |
+|---------|------|
+| `pwd` | print working directory |
+| `ls -lah` | list files (long, all, human sizes) |
+| `cd path` | change directory (`cd ..` up, `cd ~` home) |
+| `mkdir -p a/b` | make directories, parents as needed |
+| `cp src dst` / `mv src dst` | copy / move (or rename) |
+| `rm -i file` | remove (interactive prompt) |
+| `cat`, `less`, `head -n`, `tail -f` | view file contents |
+| `grep -r "pat" .` | search recursively for a pattern |
+| `find . -name "*.py"` | find files by name |
+| `chmod +x script.sh` | make a script executable |
+| `man cmd` / `cmd --help` | read the manual / quick help |
+| `Ctrl-C` / `Ctrl-D` | interrupt / end-of-input |
+
+## Git
+
+| Command | Does |
+|---------|------|
+| `git init` | start tracking a repo |
+| `git clone URL` | copy a remote repo |
+| `git status` | what's changed |
+| `git add file` / `git add -p` | stage changes (interactively) |
+| `git commit -m "msg"` | record a snapshot |
+| `git log --oneline --graph` | view history |
+| `git diff` | show unstaged changes |
+| `git branch name` / `git switch name` | create / switch branch |
+| `git pull` / `git push` | sync with remote |
+| `git restore file` | discard local changes to a file |
+
+## CI/CD (GitHub Actions)
+
+| Concept | Note |
+|---------|------|
+| Workflow | YAML file in `.github/workflows/` |
+| Trigger | `on: [push, pull_request]` |
+| Job → steps | runs on a runner; steps run in order |
+| `actions/checkout` | clones your repo into the runner |
+| Matrix | run the same job across versions/OSes |
+
+## ROS 2 (Jazzy)
+
+| Command | Does |
+|---------|------|
+| `ros2 node list` | list running nodes |
+| `ros2 topic list` / `ros2 topic echo /t` | list / inspect topics |
+| `ros2 topic hz /t` | measure publish rate |
+| `ros2 run pkg exe` | run a node |
+| `ros2 launch pkg file.launch.py` | start a launch file |
+| `ros2 param list` | list parameters |
+| `rviz2` | 3D visualization |
+| `ros2 bag record -a` / `ros2 bag play f` | record / replay data |
+
+## AI / autonomy glossary
+
+| Term | Meaning |
+|------|---------|
+| **VLA** | Vision-Language-Action model — maps images + instructions to robot actions |
+| **VLN** | Vision-Language Navigation — follow natural-language route instructions |
+| **World model** | Learned model that predicts future states for planning |
+| **Sim-to-real** | Transferring policies trained in simulation to physical robots |
+| **LM** | Language model — used for instruction parsing, planning, tool use |

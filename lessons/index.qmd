@@ -1,0 +1,45 @@
+---
+title: "ForgeLab Carpentries"
+subtitle: "Hands-on workshops for robotics, autonomy, and applied AI"
+---
+
+Welcome! ForgeLab Carpentries teaches the foundational and advanced skills behind modern
+robotics and AI systems — using the [Carpentries](https://carpentries.org/) model of
+**participatory live coding**: you don't watch, you build along with the instructor.
+
+## How these lessons work
+
+Each **episode** follows the same rhythm:
+
+1. **Objectives** — what you'll be able to do by the end.
+2. **Live coding** — the instructor types; you type along.
+3. **Challenges** — short exercises, with solutions you can reveal.
+4. **Key points** — a recap you can take away.
+
+::: {.callout-tip}
+## Before you start
+Work through [Setup](setup.qmd) to install everything *before* your workshop.
+Keep [Reference](reference.qmd) open in a tab — it's your cheat sheet.
+:::
+
+## Learning tracks
+
+| Track | Episodes start at |
+|-------|-------------------|
+| **Foundations** — Unix, Bash, Git, CI/CD | [Episode 1](episodes/01-intro-unix-shell.qmd) |
+| **Robotics & Autonomy** — ROS 2, navigation | [Episode 3](episodes/03-ros2-navigation.qmd) |
+| **AI & World Models** — VLA, VLN, LMs | *(in development — see [curriculum](https://github.com/frankvl/ForgeLab-Carpentries/tree/main/curriculum))* |
+
+The full curriculum, including Cloud/Deployment, Blockchain, and Capstones, lives in the
+[`curriculum/`](https://github.com/frankvl/ForgeLab-Carpentries/tree/main/curriculum) directory.
+
+## Who this is for
+
+Researchers, engineers, students, and domain experts who want practical, reproducible
+robotics/AI skills — no prior systems-programming background assumed for the Foundations track.
+
+## Code of Conduct
+
+All ForgeLab spaces follow our
+[Code of Conduct](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/CODE_OF_CONDUCT.md).
+Be kind, be patient, and remember: every question is a good question.

@@ -1,0 +1,44 @@
+---
+title: "Instructor Notes"
+---
+
+Cross-episode guidance for everyone teaching ForgeLab lessons. Per-episode pitfalls live in
+each episode's "Instructor note" callouts.
+
+## Before the workshop
+
+- Confirm **co-teaching**: at least 2 instructors + 1–2 helpers. Never teach alone.
+- Assign roles, especially online: **lead facilitator**, **chat/Q&A monitor**, **tech/breakout support**.
+- Test the cloud fallback (Codespaces) yourself — it's your safety net when local setup fails.
+- Open the collaborative notes doc (HackMD/Etherpad) and pin the link.
+- Send the [pre-survey](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/surveys/pre-workshop.md) ahead of time.
+
+## During — the core loop
+
+Run tight cycles: **short demo (live code) → learner challenge → debrief**. Online, make demos
+even shorter and exercises more frequent to combat fatigue.
+
+- **Type, don't paste.** Learners follow your fingers. Narrate what and why.
+- **Make mistakes on purpose** occasionally and recover — it models debugging.
+- **Check for understanding** with formative feedback (sticky notes in person; emoji/poll online).
+- **Helpers circulate** (in person) or watch chat/breakouts (online) and surface blockers.
+- **Equity in call-outs** — use random or round-robin selection, never the same hands.
+
+## Formative feedback signals
+
+- **Red/green sticky notes** (in person): green = done, red = stuck. Don't move on while reds are up.
+- **Minute cards / one-up-one-down** at breaks: one thing that worked, one to improve.
+- Adjust pace live based on signals — the schedule serves the learners, not vice versa.
+
+## Accessibility
+
+- Enable captions online (auto + a human watching for errors).
+- Increase font size; high-contrast theme; read aloud what you type.
+- Share the reference/cheat sheet link early and often.
+
+## After the workshop
+
+- Send the [post-survey](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/surveys/post-workshop.md) immediately.
+- Schedule the [3–6 month follow-up](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/surveys/followup-3-6-month.md).
+- Run a [retrospective](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/community/retrospective-template.md) with the teaching team.
+- File issues/PRs for anything in the lessons that tripped learners up. This is how we improve.

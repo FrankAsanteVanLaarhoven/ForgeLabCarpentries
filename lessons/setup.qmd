@@ -1,0 +1,87 @@
+---
+title: "Setup"
+---
+
+Please complete setup **before** your workshop. If you get stuck, come to the optional
+"install party" or post in the workshop chat — don't suffer in silence.
+
+::: {.callout-important}
+## The fastest path: cloud environment
+Every ForgeLab workshop offers a one-click cloud environment (GitHub Codespaces) with
+everything preinstalled. If your laptop is locked down or setup fails, use the cloud
+fallback — you lose nothing. Your instructor will share the link.
+:::
+
+## 1. A terminal / shell
+
+::: {.panel-tabset}
+### Linux
+You already have a terminal (e.g. GNOME Terminal). You're set.
+
+### macOS
+Use the built-in **Terminal** app, or install [iTerm2](https://iterm2.com/).
+
+### Windows
+Install [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/windows/wsl/install):
+```powershell
+wsl --install
+```
+Then use the **Ubuntu** terminal for all workshop commands.
+:::
+
+## 2. Git
+
+Verify or install:
+
+```bash
+git --version    # expect git version 2.x or newer
+```
+
+If missing: Linux `sudo apt install git`, macOS `brew install git` (or Xcode CLT),
+Windows use the WSL Ubuntu instructions above. Then set your identity:
+
+```bash
+git config --global user.name  "Your Name"
+git config --global user.email "you@example.com"
+```
+
+## 3. Python 3.10+
+
+```bash
+python3 --version
+```
+
+We recommend [Miniforge](https://github.com/conda-forge/miniforge) or your system Python
+with a virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows (WSL) / Linux / macOS
+pip install -r requirements.txt
+```
+
+## 4. Robotics track only: ROS 2
+
+The Robotics & Autonomy track uses **ROS 2 (Jazzy)**. The simplest cross-platform option is
+the official Docker image — no system-wide install required:
+
+```bash
+docker pull ros:jazzy
+docker run -it --rm ros:jazzy bash
+```
+
+Native install instructions: <https://docs.ros.org/en/jazzy/Installation.html>.
+Your instructor will confirm which option the workshop uses.
+
+## 5. A GitHub account
+
+Create one free at <https://github.com/join> if you don't have one — we use it for
+collaboration, pull requests, and the cloud environment.
+
+## Check your setup
+
+```bash
+git --version && python3 --version && echo "Core setup OK"
+```
+
+If that prints versions and `Core setup OK`, you're ready. 🎉

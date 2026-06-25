@@ -1,0 +1,124 @@
+---
+title: "Episode 3 — Robot Navigation with ROS 2"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Explain the ROS 2 node/topic/message model.
+- Inspect a running system with `ros2` command-line tools.
+- Publish a velocity command to move a (simulated) robot.
+- Describe how the navigation stack turns a goal into motion.
+
+**Teaching:** 45 min · **Exercises:** 30 min · **Requires:** ROS 2 Jazzy (see [Setup](../setup.qmd))
+:::
+
+::: {.callout-important}
+## Cloud fallback
+Native ROS 2 install is the most common setup failure. If yours isn't working, use the
+workshop Codespace or the `ros:jazzy` Docker image — you can do every step below inside it.
+:::
+
+## The mental model
+
+A ROS 2 system is a graph of **nodes** (small programs) that talk by passing **messages** over
+named **topics** (publish/subscribe) or via **services**/**actions** (request/response).
+A navigation robot, for example, runs nodes for sensing, localization, planning, and control —
+all decoupled, all swappable.
+
+```
+/camera ──img──▶ /perception ──obstacles──▶ /planner ──path──▶ /controller ──cmd_vel──▶ /robot
+```
+
+## Inspecting a running system (live coding)
+
+Start the classic demo (in one terminal):
+
+```bash
+ros2 run demo_nodes_cpp talker
+```
+
+In another terminal, explore the graph:
+
+```bash
+ros2 node list                 # /talker
+ros2 topic list                # /chatter, /rosout, /parameter_events
+ros2 topic echo /chatter       # watch messages stream by (Ctrl-C to stop)
+ros2 topic hz /chatter         # measured publish rate
+ros2 topic info /chatter       # type + publisher/subscriber counts
+```
+
+::: {.callout-tip}
+## Instructor note
+Many learners conflate "node" and "topic". Reinforce: nodes are *programs*, topics are
+*channels*. The `ros2 topic info` output (publishers vs subscribers) makes this concrete.
+:::
+
+## Making a robot move
+
+Motion commands travel on `/cmd_vel` as a `geometry_msgs/msg/Twist` (linear + angular
+velocity). Start a simulated robot (e.g. `turtlesim`):
+
+```bash
+ros2 run turtlesim turtlesim_node
+```
+
+Drive it by publishing once:
+
+```bash
+ros2 topic pub --once /turtle1/cmd_vel geometry_msgs/msg/Twist \
+  "{linear: {x: 1.0}, angular: {z: 0.5}}"
+```
+
+The turtle moves forward while turning — exactly the signal a real differential-drive base
+consumes.
+
+::: {.callout-note collapse="true"}
+## Challenge 1 — Drive a square
+Using repeated `ros2 topic pub --once` commands (move forward, then rotate ~90°, repeat),
+drive the turtle in an approximate square. What makes this hard to do precisely with open-loop
+commands?
+
+### Solution
+Open-loop timing/velocity commands drift — there's no feedback correcting position or heading.
+This is exactly *why* we need localization and closed-loop control: the navigation stack uses
+sensor feedback to correct error, instead of dead-reckoning blindly.
+:::
+
+## From goal to motion: the nav stack
+
+Production navigation (e.g. **Nav2**) composes several capabilities:
+
+1. **Localization** — where am I on the map? (e.g. AMCL, or SLAM while mapping)
+2. **Global planning** — a path from start to goal that avoids known obstacles.
+3. **Local planning / control** — follow the path while dodging *new* obstacles, emitting `cmd_vel`.
+4. **Recovery behaviors** — what to do when stuck (back up, clear costmap, re-plan).
+
+You send a **goal pose**; the stack continuously senses, plans, and controls until you arrive.
+This is the bridge to the AI tracks: a **VLN** model can *produce* that goal (or a sequence of
+them) from a natural-language instruction, and a **world model** can predict outcomes to plan
+ahead.
+
+::: {.callout-note collapse="true"}
+## Challenge 2 — Map the roles
+A teammate says "the planner failed, the robot just spun in place." Which nav component(s)
+would you inspect first, and what `ros2` command helps you see if goals are even arriving?
+
+### Solution
+Check the **global/local planner** and **recovery behaviors** (spinning is often a recovery).
+First confirm goals arrive: `ros2 topic echo` (or `ros2 action list` / `ros2 action info`) on
+the navigation goal topic/action, and inspect costmaps in `rviz2`.
+:::
+
+::: {.callout-important}
+## Key points
+- ROS 2 = nodes communicating via topics/services/actions.
+- `ros2 node|topic` CLI tools let you observe any running system.
+- Motion is just messages: publishing `Twist` to `/cmd_vel` moves the base.
+- Navigation = localization + planning + control + recovery, driven by a goal pose —
+  the natural integration point for VLN and world-model–based planning.
+:::
+
+This completes the sample episodes. Continue building tracks in
+[`curriculum/`](https://github.com/frankvl/ForgeLab-Carpentries/tree/main/curriculum).

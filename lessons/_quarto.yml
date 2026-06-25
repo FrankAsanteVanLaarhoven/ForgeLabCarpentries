@@ -1,0 +1,55 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "ForgeLab Carpentries"
+  description: "Hands-on workshops for robotics, autonomy, and applied AI."
+  site-url: "https://frankvl.github.io/ForgeLab-Carpentries"
+  repo-url: "https://github.com/frankvl/ForgeLab-Carpentries"
+  repo-actions: [edit, issue]
+  page-navigation: true
+  back-to-top-navigation: true
+  navbar:
+    background: primary
+    search: true
+    left:
+      - text: "Home"
+        file: index.qmd
+      - text: "Setup"
+        file: setup.qmd
+      - text: "Reference"
+        file: reference.qmd
+      - text: "Instructor Notes"
+        file: instructor-notes.qmd
+    right:
+      - icon: github
+        href: "https://github.com/frankvl/ForgeLab-Carpentries"
+        aria-label: GitHub
+  sidebar:
+    style: docked
+    contents:
+      - section: "Episodes"
+        contents:
+          - episodes/01-intro-unix-shell.qmd
+          - episodes/02-git-version-control.qmd
+          - episodes/03-ros2-navigation.qmd
+  page-footer:
+    center: "Content CC-BY 4.0 · Code MIT · ForgeLab Carpentries"
+
+format:
+  html:
+    theme:
+      - cosmo
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    highlight-style: github
+    callout-appearance: simple
+
+# Lessons mix prose with executable cells. Default to NOT re-executing on
+# every render (set to true per-episode when cells must run live).
+execute:
+  freeze: auto
+  echo: true
