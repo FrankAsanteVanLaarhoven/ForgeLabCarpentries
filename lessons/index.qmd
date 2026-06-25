@@ -28,10 +28,10 @@ Keep [Reference](reference.qmd) open in a tab — it's your cheat sheet.
 |-------|-------------------|
 | **Foundations** — Unix, Bash, Git, CI/CD | [Episode 1](episodes/01-intro-unix-shell.qmd) |
 | **Robotics & Autonomy** — ROS 2, navigation | [Episode 3](episodes/03-ros2-navigation.qmd) |
-| **AI & World Models** — VLA, VLN, LMs | *(in development — see [curriculum](https://github.com/frankvl/ForgeLab-Carpentries/tree/main/curriculum))* |
+| **AI & World Models** — VLA, VLN, LMs | *(in development — see [curriculum](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/tree/main/curriculum))* |
 
 The full curriculum, including Cloud/Deployment, Blockchain, and Capstones, lives in the
-[`curriculum/`](https://github.com/frankvl/ForgeLab-Carpentries/tree/main/curriculum) directory.
+[`curriculum/`](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/tree/main/curriculum) directory.
 
 ## Who this is for
 
@@ -41,5 +41,5 @@ robotics/AI skills — no prior systems-programming background assumed for the F
 ## Code of Conduct
 
 All ForgeLab spaces follow our
-[Code of Conduct](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/CODE_OF_CONDUCT.md).
+[Code of Conduct](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/CODE_OF_CONDUCT.md).
 Be kind, be patient, and remember: every question is a good question.

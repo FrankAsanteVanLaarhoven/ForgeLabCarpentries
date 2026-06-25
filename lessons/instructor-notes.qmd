@@ -11,7 +11,7 @@ each episode's "Instructor note" callouts.
 - Assign roles, especially online: **lead facilitator**, **chat/Q&A monitor**, **tech/breakout support**.
 - Test the cloud fallback (Codespaces) yourself — it's your safety net when local setup fails.
 - Open the collaborative notes doc (HackMD/Etherpad) and pin the link.
-- Send the [pre-survey](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/surveys/pre-workshop.md) ahead of time.
+- Send the [pre-survey](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/surveys/pre-workshop.md) ahead of time.
 
 ## During — the core loop
 
@@ -38,7 +38,7 @@ even shorter and exercises more frequent to combat fatigue.
 
 ## After the workshop
 
-- Send the [post-survey](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/surveys/post-workshop.md) immediately.
-- Schedule the [3–6 month follow-up](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/surveys/followup-3-6-month.md).
-- Run a [retrospective](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/community/retrospective-template.md) with the teaching team.
+- Send the [post-survey](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/surveys/post-workshop.md) immediately.
+- Schedule the [3–6 month follow-up](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/surveys/followup-3-6-month.md).
+- Run a [retrospective](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/community/retrospective-template.md) with the teaching team.
 - File issues/PRs for anything in the lessons that tripped learners up. This is how we improve.

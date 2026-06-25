@@ -15,7 +15,7 @@
 - 📋 **Pre-workshop survey:** https://forms.gle/forgelab-pre  (please complete *before* day 1)
 - ✅ **Post-workshop survey:** https://forms.gle/forgelab-post  (shared at the end)
 - 💬 **Chat / help channel:** https://discord.gg/forgelab
-- 📚 **Lessons:** https://frankvl.github.io/ForgeLab-Carpentries
+- 📚 **Lessons:** https://frankasantevanlaarhoven.github.io/ForgeLabCarpentries
 - 🤝 **Code of Conduct:** ../../CODE_OF_CONDUCT.md
 
 ## Instructors & helpers
@@ -37,11 +37,11 @@
 
 ## Setup
 
-Complete **before** 2026-07-15. Full guide: <https://frankvl.github.io/ForgeLab-Carpentries/setup.html>.
+Complete **before** 2026-07-15. Full guide: <https://frankasantevanlaarhoven.github.io/ForgeLabCarpentries/setup.html>.
 
 ::: tip
 **Cloud fallback:** a one-click GitHub Codespace with shell, Git, Python, and ROS 2 preinstalled
-is at <https://github.com/frankvl/ForgeLab-Carpentries> → *Code ▸ Codespaces*. Use it if local
+is at <https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries> → *Code ▸ Codespaces*. Use it if local
 setup fails — you'll miss nothing.
 :::
 
@@ -63,11 +63,11 @@ Verify: `git --version && python3 --version && echo "Core setup OK"`
 | Time | Topic |
 |------|-------|
 | 09:00 | Welcome, Code of Conduct, icebreaker |
-| 09:20 | [Episode 1 — The Unix Shell for Roboticists](https://frankvl.github.io/ForgeLab-Carpentries/episodes/01-intro-unix-shell.html) |
+| 09:20 | [Episode 1 — The Unix Shell for Roboticists](https://frankasantevanlaarhoven.github.io/ForgeLabCarpentries/episodes/01-intro-unix-shell.html) |
 | 10:30 | ☕ Break |
 | 10:45 | Episode 1 continued — pipes & a first Bash script |
 | 12:00 | 🍽️ Lunch |
-| 13:00 | [Episode 2 — Version Control with Git](https://frankvl.github.io/ForgeLab-Carpentries/episodes/02-git-version-control.html) |
+| 13:00 | [Episode 2 — Version Control with Git](https://frankasantevanlaarhoven.github.io/ForgeLabCarpentries/episodes/02-git-version-control.html) |
 | 14:30 | ☕ Break |
 | 14:45 | Episode 2 continued — branches & pull requests |
 | 16:15 | Wrap-up, sticky-note feedback, next steps |
@@ -78,7 +78,7 @@ Verify: `git --version && python3 --version && echo "Core setup OK"`
 | Time | Topic |
 |------|-------|
 | 09:00 | Recap + questions |
-| 09:20 | [Episode 3 — Robot Navigation with ROS 2](https://frankvl.github.io/ForgeLab-Carpentries/episodes/03-ros2-navigation.html) |
+| 09:20 | [Episode 3 — Robot Navigation with ROS 2](https://frankasantevanlaarhoven.github.io/ForgeLabCarpentries/episodes/03-ros2-navigation.html) |
 | 10:30 | ☕ Break |
 | 10:45 | Drive a simulated robot; inspect the running system |
 | 12:00 | 🍽️ Lunch |

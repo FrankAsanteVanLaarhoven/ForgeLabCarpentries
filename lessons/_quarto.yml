@@ -5,8 +5,8 @@ project:
 website:
   title: "ForgeLab Carpentries"
   description: "Hands-on workshops for robotics, autonomy, and applied AI."
-  site-url: "https://frankvl.github.io/ForgeLab-Carpentries"
-  repo-url: "https://github.com/frankvl/ForgeLab-Carpentries"
+  site-url: "https://frankasantevanlaarhoven.github.io/ForgeLabCarpentries"
+  repo-url: "https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries"
   repo-actions: [edit, issue]
   page-navigation: true
   back-to-top-navigation: true
@@ -24,7 +24,7 @@ website:
         file: instructor-notes.qmd
     right:
       - icon: github
-        href: "https://github.com/frankvl/ForgeLab-Carpentries"
+        href: "https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries"
         aria-label: GitHub
   sidebar:
     style: docked

@@ -103,7 +103,7 @@ git push -u origin main
 
 The collaborative workflow: **fork → branch → commit → push → pull request → review → merge.**
 This is exactly how you'll contribute to ForgeLab lessons (see
-[CONTRIBUTING](https://github.com/frankvl/ForgeLab-Carpentries/blob/main/CONTRIBUTING.md)).
+[CONTRIBUTING](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/CONTRIBUTING.md)).
 
 ::: {.callout-note collapse="true"}
 ## Challenge 2 — Recover from a mistake

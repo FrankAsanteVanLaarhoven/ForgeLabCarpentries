@@ -121,4 +121,4 @@ the navigation goal topic/action, and inspect costmaps in `rviz2`.
 :::
 
 This completes the sample episodes. Continue building tracks in
-[`curriculum/`](https://github.com/frankvl/ForgeLab-Carpentries/tree/main/curriculum).
+[`curriculum/`](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/tree/main/curriculum).
