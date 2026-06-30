@@ -1,0 +1,139 @@
+---
+title: "AI Episode 13 — Vision-Language-Action (VLA)"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Explain what a VLA model is and how it differs from VLN.
+- Describe the observation → action loop and common action representations.
+- Wire a VLA policy to a ROS 2 control interface, safely.
+- Evaluate a policy honestly, including out-of-distribution behavior.
+
+**Teaching:** 45 min · **Exercises:** 30 min · **Builds on:** [Ep 12 — VLN](ai-12-vln.qmd), [Robotics Ep 3](03-ros2-navigation.qmd)
+:::
+
+## VLA vs VLN
+
+In [VLN](ai-12-vln.qmd) the model emits high-level **goals** that a planner (Nav2) executes. A
+**Vision-Language-Action** model goes further: it maps an observation and an instruction
+**directly to low-level actions** — end-effector deltas, joint targets, or base velocities — and
+runs in a tight closed loop.
+
+| | VLN | VLA |
+|---|-----|-----|
+| Output | goal pose(s) | actions (continuous/tokenized) |
+| Executor | classical planner + controller | the policy *is* the controller |
+| Loop rate | per-goal (seconds) | per-step (10–50+ Hz) |
+| Strength | reliable, interpretable | dexterous, reactive, end-to-end |
+| Risk | brittle grounding | opaque, harder to bound |
+
+Use VLN when a map + planner suffice; reach for VLA for contact-rich or reactive tasks
+(manipulation, whole-body control) where hand-designed planning is hard.
+
+## The observation → action loop
+
+```
+            ┌─────────────── policy (VLA model) ───────────────┐
+image ─▶ vision encoder ─┐                                      │
+                          ├─▶ fused tokens ─▶ action head ─▶ action(s)
+instruction ─▶ text enc ─┘                                      │
+            └───────────── conditioned on proprioception ───────┘
+                         observe ◀── execute on robot ◀── action
+```
+
+```python
+# Conceptual control loop (provider/model-agnostic)
+policy = load_vla_policy(checkpoint)            # your trained/finetuned VLA
+rate = Rate(20)                                 # 20 Hz control
+while not done:
+    obs = get_observation()                     # image(s), proprioception
+    action = policy.act(obs, instruction)       # -> e.g. 7-DoF delta + gripper
+    action = clamp_to_limits(action)            # SAFETY: never trust raw output
+    send_action(action)                         # to the controller (see below)
+    rate.sleep()
+```
+
+## Action representations
+
+- **Continuous deltas** — e.g. end-effector `(dx, dy, dz, droll, dpitch, dyaw, gripper)`. Simple,
+  common for manipulation.
+- **Tokenized actions** — discretize each dimension into bins so a transformer predicts action
+  "tokens" like text. Enables reusing LM architectures.
+- **Action chunking** — predict a short *sequence* of future actions per inference, then execute
+  them open-loop briefly. Reduces latency sensitivity and jitter.
+
+::: {.callout-tip}
+## Instructor note
+Have learners reason about **control rate vs inference latency**. If the model takes 80 ms but the
+controller wants 20 Hz (50 ms budget), the naive loop stalls. Action chunking is the standard fix —
+make them connect the dots rather than just stating it.
+:::
+
+## Wiring to ROS 2 — safely
+
+A VLA outputs actions; ROS 2 carries them to the hardware. For a mobile base it's the same
+`/cmd_vel` `Twist` from [Episode 3](03-ros2-navigation.qmd); for an arm it's a joint/trajectory
+controller:
+
+```python
+def send_action(action):
+    # Mobile base: reuse the Twist interface from Episode 3
+    twist = Twist(linear=Vec3(x=action.v), angular=Vec3(z=action.w))
+    cmd_vel_pub.publish(twist)
+    # Arm: publish to a joint controller / FollowJointTrajectory action instead
+```
+
+**Safety is not optional** for a policy that drives hardware directly:
+
+- **Clamp** every action to joint/velocity/torque limits before sending.
+- **Watchdog**: if no fresh action arrives within N ms, command zero/hold.
+- **E-stop & workspace bounds**: a hardware stop and software geofence the policy cannot override.
+- **Confidence / OOD check**: detect inputs unlike training data and fall back to a safe stop.
+
+::: {.callout-note collapse="true"}
+## Challenge — Budget the loop
+Your VLA inference takes 70 ms but the arm controller expects commands at 30 Hz (~33 ms period).
+The naive loop can't keep up. Name one technique to bridge the gap and one risk it introduces.
+
+### Solution
+**Action chunking**: predict, say, 8 actions per inference and execute them at 30 Hz while the
+next chunk computes — amortizing the 70 ms over many control steps. **Risk:** the chunk is
+executed partly open-loop, so it can't react to disturbances mid-chunk; keep chunks short and
+re-plan on significant observation change.
+:::
+
+## Evaluate honestly
+
+As with [VLN](ai-12-vln.qmd), demos are not evidence. For VLA report:
+
+- **Task success rate** over many trials and **seeds/initial conditions** — not a cherry-picked run.
+- **Robustness**: success under perturbations (lighting, object pose, distractors).
+- **Out-of-distribution behavior**: what does it do on inputs unlike training? Safe failure or
+  dangerous flailing?
+- A **failure taxonomy**: perception vs policy vs control vs safety-trip.
+
+::: {.callout-note collapse="true"}
+## Challenge — Pick the right tool
+For each task, would you start with VLN or VLA, and why?
+(a) "Drive to the loading dock." (b) "Pick up the red mug and hand it to me."
+
+### Solution
+(a) **VLN** — a map + planner reliably reaches a known location; goals are interpretable and
+bounded. (b) **VLA** — contact-rich grasping and handover are reactive and hard to plan
+classically; an end-to-end policy handles the closed-loop dexterity. The two compose: VLN to get
+there, VLA to do the manipulation.
+:::
+
+::: {.callout-important}
+## Key points
+- VLA maps observation + instruction **directly to actions**; it *is* the controller.
+- Mind action representation (continuous/tokenized) and **action chunking** for latency.
+- Send actions through ROS 2, but **clamp, watchdog, geofence, and E-stop** — always.
+- Evaluate over many trials with robustness + OOD tests and a failure taxonomy.
+- VLN and VLA **compose**: navigate with VLN, manipulate with VLA.
+:::
+
+Next in this track: World Models for Planning (Ep 14) and Evaluation & Safety (Ep 15) — see the
+[track map](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/curriculum/tracks/ai-world-models.md).

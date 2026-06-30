@@ -54,6 +54,7 @@ website:
       - section: "AI & World Models"
         contents:
           - episodes/ai-12-vln.qmd
+          - episodes/ai-13-vla.qmd
   page-footer:
     center: "Content CC-BY 4.0 · Code MIT · ForgeLab Carpentries"
 
