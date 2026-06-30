@@ -1,5 +1,6 @@
 ---
 title: "R Episode 14 — Producing Reports with Quarto"
+engine: markdown
 ---
 
 ::: {.callout-note}
