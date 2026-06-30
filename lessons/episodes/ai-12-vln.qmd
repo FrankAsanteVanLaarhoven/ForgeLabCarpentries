@@ -1,0 +1,142 @@
+---
+title: "AI Episode 12 — Vision-Language Navigation (VLN)"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Define the VLN task and how it differs from classic navigation.
+- Turn a natural-language instruction into a sequence of navigation goals.
+- Connect a language model to the ROS 2 / Nav2 goal interface.
+- Evaluate a VLN agent honestly with Success Rate and SPL.
+
+**Teaching:** 45 min · **Exercises:** 30 min · **Builds on:** [Robotics Episode 3](03-ros2-navigation.qmd)
+:::
+
+## What is VLN?
+
+**Vision-Language Navigation** is the task of following a free-form instruction —
+*"go down the hallway, turn left at the kitchen, and stop by the window"* — using visual
+observations to reach the described goal. Unlike classic navigation (Episode 3), where *you*
+supply a goal pose, in VLN the **agent infers the goals from language + what it sees**.
+
+The pipeline decomposes cleanly:
+
+```
+instruction ─▶ [language model] ─▶ subgoals ─▶ [grounding w/ perception] ─▶ goal poses ─▶ [Nav2] ─▶ motion
+        observations (vision) ─────────────┘                         feedback ◀───────────┘
+```
+
+This is the integration point we previewed in Episode 3: VLN *produces* the goal poses that the
+navigation stack already knows how to reach.
+
+## Step 1 — Parse the instruction into subgoals
+
+Keep the model interface **provider-agnostic** — define one function and swap the backend later.
+Ask for *structured* output so the rest of the system is deterministic:
+
+```python
+# llm_backend.py — provider-agnostic wrapper (fill in your preferred LLM)
+def llm_plan(instruction: str, scene_summary: str) -> list[dict]:
+    """Return an ordered list of subgoals, e.g.
+    [{"action": "go_to", "landmark": "kitchen"},
+     {"action": "turn",  "direction": "left"},
+     {"action": "stop",  "landmark": "window"}]
+    """
+    prompt = (
+        "You are a robot navigation planner. Given an instruction and a scene, "
+        "return a JSON list of subgoals using only actions go_to/turn/stop.\n"
+        f"Instruction: {instruction}\nScene: {scene_summary}"
+    )
+    return call_llm_json(prompt)   # your backend; validate the schema on return
+```
+
+::: {.callout-tip}
+## Instructor note
+Stress **structured output + schema validation**. A free-text plan is unusable downstream;
+a validated JSON schema is. Have learners add one assertion that every subgoal's `action` is in
+the allowed set — this is the difference between a demo and something that won't crash a robot.
+:::
+
+## Step 2 — Ground subgoals in perception
+
+A subgoal like `{"landmark": "kitchen"}` must become a metric **goal pose**. A vision-language
+model maps the landmark phrase to a detected object/region, which you look up in the map frame:
+
+```python
+def ground_landmark(landmark: str, observation) -> "PoseStamped":
+    # vision-language grounding: find the region best matching `landmark`
+    region = vlm_locate(landmark, observation.image)        # bbox / mask + confidence
+    point  = deproject_to_map(region, observation.depth, observation.tf)
+    return make_pose_stamped(point, frame_id="map")
+```
+
+If grounding confidence is low, **don't invent a pose** — ask for clarification or fall back to
+exploration. Hallucinated goals are how language agents drive robots into walls.
+
+## Step 3 — Send goals to Nav2
+
+Reuse the navigation stack from Episode 3 — VLN only adds the goal source:
+
+```python
+# Pseudocode over the Nav2 NavigateToPose action
+for subgoal in plan:
+    if subgoal["action"] == "stop":
+        break
+    pose = ground_landmark(subgoal["landmark"], get_observation())
+    result = nav2_go_to(pose)            # blocks until arrived / failed / recovered
+    if not result.succeeded:
+        replan(instruction, get_observation())   # close the loop with fresh perception
+```
+
+The agent **re-perceives and can re-plan** between subgoals — VLN is closed-loop, not a one-shot
+translation.
+
+## Step 4 — Evaluate honestly
+
+Demos lie; metrics don't. Standard VLN metrics:
+
+| Metric | Meaning |
+|--------|---------|
+| **SR** (Success Rate) | fraction of episodes ending within a threshold of the true goal |
+| **SPL** | Success weighted by Path Length — rewards *efficient* success, penalizes wandering |
+| **nDTW** | how closely the taken path follows the intended one |
+
+Report **SR and SPL together**: a high SR with low SPL means the robot succeeds but takes wildly
+inefficient paths. Always include a **failure taxonomy** (grounding errors vs planning errors vs
+control failures) — knowing *why* it fails is what drives the next improvement.
+
+::: {.callout-note collapse="true"}
+## Challenge — Add a guardrail
+Your `ground_landmark()` sometimes returns a low-confidence pose and the robot heads to the wrong
+room. Describe one concrete guardrail and where it goes in the pipeline.
+
+### Solution
+Threshold the grounding confidence in `ground_landmark()`: if `region.confidence < τ`, do **not**
+return a pose — instead raise/return a sentinel that triggers a clarification request or a short
+exploration step before retrying. The guardrail belongs at the grounding boundary, before any
+pose reaches Nav2.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge — Why both SR and SPL?
+An agent reports SR = 0.85 but SPL = 0.30. What does that tell you, and what would you investigate?
+
+### Solution
+It succeeds often but very inefficiently (long, winding paths). Investigate the planner/grounding:
+are subgoals ordered poorly, is it backtracking due to weak grounding, or is recovery behavior
+triggering too often? High SR alone would have hidden this.
+:::
+
+::: {.callout-important}
+## Key points
+- VLN infers navigation goals from language + vision; classic nav executes given goals.
+- Decompose: instruction → subgoals (LM) → grounded goal poses (VLM) → Nav2 → motion.
+- Demand **structured, validated** model output and **confidence-gated** grounding — never feed
+  hallucinated goals to a robot.
+- Evaluate with **SR + SPL** plus a failure taxonomy; demos are not evidence.
+:::
+
+This is the first live episode of the AI & World Models track. See the full track map in
+[`curriculum/`](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/curriculum/tracks/ai-world-models.md).

@@ -29,7 +29,7 @@ Keep [Reference](reference.qmd) open in a tab — it's your cheat sheet.
 | **Foundations** — Unix, Bash, Git, CI/CD | [Episode 1](episodes/01-intro-unix-shell.qmd) |
 | **Robotics & Autonomy** — ROS 2, navigation | [Episode 3](episodes/03-ros2-navigation.qmd) |
 | **R for Reproducible Science** — tidyverse, Quarto, renv | [R Episode 1](episodes/r-01-intro-r-rstudio.qmd) |
-| **AI & World Models** — VLA, VLN, LMs | *(in development — see [curriculum](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/tree/main/curriculum))* |
+| **AI & World Models** — VLA, VLN, LMs | [VLN episode](episodes/ai-12-vln.qmd) |
 
 The full curriculum, including Cloud/Deployment, Blockchain, and Capstones, lives in the
 [`curriculum/`](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/tree/main/curriculum) directory.

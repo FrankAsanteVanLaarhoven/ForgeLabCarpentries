@@ -51,6 +51,9 @@ website:
           - episodes/r-13-tidyr.qmd
           - episodes/r-14-quarto-reports.qmd
           - episodes/r-15-writing-good-software.qmd
+      - section: "AI & World Models"
+        contents:
+          - episodes/ai-12-vln.qmd
   page-footer:
     center: "Content CC-BY 4.0 · Code MIT · ForgeLab Carpentries"
 
