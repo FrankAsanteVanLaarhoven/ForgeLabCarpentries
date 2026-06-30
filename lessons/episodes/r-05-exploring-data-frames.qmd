@@ -1,0 +1,81 @@
+---
+title: "R Episode 5 — Exploring Data Frames"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Import a CSV into a tibble with `readr`.
+- Inspect dimensions, columns, and types.
+- Get quick summaries of a dataset.
+
+**Teaching:** 30 min · **Exercises:** 20 min
+:::
+
+## Data frames and tibbles
+
+A **data frame** is R's table: columns are vectors (each one type), rows are observations. The
+tidyverse's **tibble** is a modern data frame with nicer printing and no surprise coercions.
+
+We'll use the **gapminder** dataset throughout this track.
+
+```r
+library(readr)
+library(here)
+
+gapminder <- read_csv(here("data", "gapminder.csv"))
+# Or, if you installed the package:  gapminder <- gapminder::gapminder
+gapminder
+```
+
+::: {.callout-tip}
+## Instructor note
+`read_csv()` prints the column types it guessed. Pause on this — checking that types are right
+*at import time* prevents downstream bugs (e.g. a year read as character).
+:::
+
+## Inspecting structure
+
+```r
+dim(gapminder)        # rows, columns
+nrow(gapminder); ncol(gapminder)
+names(gapminder)      # column names
+head(gapminder)       # first rows
+str(gapminder)        # types + preview
+glimpse(gapminder)    # dplyr's transposed, readable view
+```
+
+## Quick summaries
+
+```r
+summary(gapminder)             # per-column summary stats
+unique(gapminder$continent)    # distinct values of a column
+length(unique(gapminder$country))
+```
+
+::: {.callout-note collapse="true"}
+## Challenge — First questions
+Without any new packages, answer:
+
+1. How many rows and columns does `gapminder` have?
+2. What type is the `year` column?
+3. How many distinct continents are present?
+
+### Solution
+
+```r
+dim(gapminder)
+class(gapminder$year)
+length(unique(gapminder$continent))
+```
+:::
+
+::: {.callout-important}
+## Key points
+- `read_csv()` imports data and reports column types — verify them early.
+- A tibble is a friendly data frame; columns are typed vectors.
+- `glimpse()`, `str()`, and `summary()` are your first look at any dataset.
+:::
+
+Next: [Episode 6 — Subsetting Data](r-06-subsetting-data.qmd).

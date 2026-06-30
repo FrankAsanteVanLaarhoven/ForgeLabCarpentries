@@ -1,0 +1,97 @@
+---
+title: "R Episode 12 — Data Manipulation with dplyr"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Use the core dplyr verbs: `filter`, `select`, `mutate`, `arrange`.
+- Chain steps with the native pipe `|>`.
+- Summarize by group with `group_by()` + `summarise()`.
+
+**Teaching:** 40 min · **Exercises:** 30 min
+:::
+
+## The pipe
+
+The native pipe **`|>`** (R 4.1+) passes the left value into the next function's first argument,
+turning nested calls into a readable top-to-bottom pipeline. (You may also see magrittr's `%>%`
+in older code — they're largely interchangeable here.)
+
+```r
+library(dplyr)
+
+gapminder |> filter(year == 2007) |> head()
+```
+
+## The core verbs
+
+```r
+# filter(): keep rows by condition
+gapminder |> filter(continent == "Europe", year == 2007)
+
+# select(): keep/drop columns
+gapminder |> select(country, year, lifeExp)
+
+# mutate(): add/transform columns
+gapminder |> mutate(gdp = pop * gdpPercap)
+
+# arrange(): sort rows
+gapminder |> arrange(desc(lifeExp))
+```
+
+## Compose a pipeline
+
+```r
+gapminder |>
+  filter(continent == "Asia", year == 2007) |>
+  mutate(gdp_billion = pop * gdpPercap / 1e9) |>
+  select(country, lifeExp, gdp_billion) |>
+  arrange(desc(gdp_billion))
+```
+
+::: {.callout-tip}
+## Instructor note
+Read a pipeline aloud as a sentence: "take gapminder, *then* filter, *then* mutate, *then*
+select…". This framing makes the pipe click. Build the pipeline one verb at a time, running after
+each, so learners see it grow.
+:::
+
+## Group and summarize
+
+```r
+gapminder |>
+  group_by(continent, year) |>
+  summarise(
+    mean_life = mean(lifeExp),
+    total_pop = sum(pop),
+    .groups = "drop"
+  )
+```
+
+This single idiom replaces the loop from Episode 7 — and reads far better.
+
+::: {.callout-note collapse="true"}
+## Challenge — Top of each continent
+For the year 2007, find the country with the highest life expectancy on each continent.
+
+### Solution
+
+```r
+gapminder |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  slice_max(lifeExp, n = 1) |>
+  select(continent, country, lifeExp)
+```
+:::
+
+::: {.callout-important}
+## Key points
+- `|>` chains operations into readable pipelines.
+- `filter`/`select`/`mutate`/`arrange` cover most row/column work.
+- `group_by()` + `summarise()` is the idiomatic grouped aggregation.
+:::
+
+Next: [Episode 13 — Reshaping Data with tidyr](r-13-tidyr.qmd).

@@ -1,0 +1,97 @@
+---
+title: "R Episode 13 — Reshaping Data with tidyr"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Explain what makes data "tidy."
+- Reshape between long and wide with `pivot_longer()` and `pivot_wider()`.
+- Combine reshaping with dplyr in a pipeline.
+
+**Teaching:** 35 min · **Exercises:** 25 min
+:::
+
+## Tidy data
+
+Data is **tidy** when: each variable is a column, each observation is a row, and each value is a
+cell. Tidy data is what dplyr and ggplot2 expect, so most analysis starts with reshaping into
+tidy form.
+
+::: {.callout-tip}
+## Instructor note
+The original Carpentries lesson used `gather()`/`spread()`. Those are **superseded** — teach
+`pivot_longer()`/`pivot_wider()`, which are clearer and actively maintained. Mention the old
+names only so learners recognize them in legacy code.
+:::
+
+## Wide → long with pivot_longer()
+
+Suppose GDP per capita is spread across year columns (`gdp_1997`, `gdp_2002`, `gdp_2007`):
+
+```r
+library(tidyr)
+library(dplyr)
+
+long <- wide |>
+  pivot_longer(
+    cols = starts_with("gdp_"),
+    names_to = "year",
+    names_prefix = "gdp_",
+    values_to = "gdpPercap"
+  )
+long
+```
+
+## Long → wide with pivot_wider()
+
+The inverse — spread one column of names across multiple columns:
+
+```r
+wide_again <- long |>
+  pivot_wider(
+    names_from = year,
+    names_prefix = "gdp_",
+    values_from = gdpPercap
+  )
+```
+
+## Reshape, then analyze
+
+Reshaping is usually a step inside a larger pipeline:
+
+```r
+gapminder |>
+  filter(continent == "Europe") |>
+  select(country, year, lifeExp) |>
+  pivot_wider(names_from = year, values_from = lifeExp)
+```
+
+…producing a country-by-year matrix of life expectancy, ready for a table or export.
+
+::: {.callout-note collapse="true"}
+## Challenge — Tidy then summarize
+Starting from a wide table `wide` with `gdp_1997`/`gdp_2002`/`gdp_2007`, pivot to long form and
+compute the mean GDP per capita per year.
+
+### Solution
+
+```r
+wide |>
+  pivot_longer(starts_with("gdp_"), names_to = "year",
+               names_prefix = "gdp_", values_to = "gdp") |>
+  group_by(year) |>
+  summarise(mean_gdp = mean(gdp), .groups = "drop")
+```
+:::
+
+::: {.callout-important}
+## Key points
+- Tidy = one variable per column, one observation per row.
+- `pivot_longer()` gathers columns into rows; `pivot_wider()` does the reverse.
+- These replace the superseded `gather()`/`spread()`.
+- Reshaping is usually one step in a dplyr pipeline.
+:::
+
+Next: [Episode 14 — Producing Reports with Quarto](r-14-quarto-reports.qmd).

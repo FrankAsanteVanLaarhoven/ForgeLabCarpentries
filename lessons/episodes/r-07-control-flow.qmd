@@ -1,0 +1,94 @@
+---
+title: "R Episode 7 — Control Flow"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Branch with `if` / `else if` / `else`.
+- Repeat with `for` loops.
+- Recognize when vectorized or functional code is clearer than a loop.
+
+**Teaching:** 30 min · **Exercises:** 20 min
+:::
+
+## Conditionals
+
+```r
+x <- 8
+if (x > 10) {
+  print("big")
+} else if (x > 5) {
+  print("medium")
+} else {
+  print("small")
+}
+```
+
+`if` expects a **single** logical value. For element-wise choices on a vector, use the
+vectorized `ifelse()` (or `dplyr::if_else()`):
+
+```r
+scores <- c(45, 82, 67, 91)
+ifelse(scores >= 60, "pass", "fail")
+```
+
+::: {.callout-tip}
+## Instructor note
+A very common error: passing a length-> 1 vector to `if`. Modern R raises an error (older R only
+warned). Steer learners toward `ifelse()`/`if_else()` for vectors from the start.
+:::
+
+## Loops
+
+```r
+for (continent in unique(gapminder$continent)) {
+  rows <- gapminder[gapminder$continent == continent, ]
+  cat(continent, "mean lifeExp:", round(mean(rows$lifeExp), 1), "\n")
+}
+```
+
+Loops are fine and readable — but in R, **vectorized** and **functional** approaches are often
+clearer and faster (next episode).
+
+## Prefer vectorized / functional style
+
+The loop above is more idiomatic as a grouped summary (Episode 12):
+
+```r
+library(dplyr)
+gapminder |>
+  group_by(continent) |>
+  summarise(mean_life = mean(lifeExp))
+```
+
+…or with `purrr::map_dbl()` when you need a function applied over a list/vector.
+
+::: {.callout-note collapse="true"}
+## Challenge — Rewrite without a loop
+This loop classifies values; rewrite it as one vectorized call.
+
+```r
+out <- character(length(scores))
+for (i in seq_along(scores)) {
+  out[i] <- if (scores[i] >= 60) "pass" else "fail"
+}
+```
+
+### Solution
+
+```r
+out <- ifelse(scores >= 60, "pass", "fail")
+```
+Shorter, faster, and far less error-prone than the index-based loop.
+:::
+
+::: {.callout-important}
+## Key points
+- `if` takes a single logical; use `ifelse()`/`if_else()` for vectors.
+- `for` loops work, but vectorized/functional code is usually clearer in R.
+- Reach for grouped `dplyr` summaries or `purrr::map` before writing index loops.
+:::
+
+Next: [Episode 8 — Publication-Quality Graphics with ggplot2](r-08-ggplot2.qmd).

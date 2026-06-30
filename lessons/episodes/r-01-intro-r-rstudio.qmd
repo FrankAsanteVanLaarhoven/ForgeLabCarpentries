@@ -1,0 +1,100 @@
+---
+title: "R Episode 1 — Introduction to R and the IDE"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Run R interactively in RStudio (or Positron).
+- Use R as a calculator and understand operator precedence.
+- Assign values to variables and inspect them.
+- Recognize and find R's data types.
+
+**Teaching:** 30 min · **Exercises:** 15 min
+:::
+
+## R and the IDE
+
+**R** is a language for data analysis and statistics. You'll write R inside an **IDE** — most
+commonly **RStudio**, or **Positron**, Posit's next-generation IDE built on the VS Code engine.
+Either works for this track; we'll show RStudio's four panes (Console, Source, Environment,
+Plots/Help) but everything transfers.
+
+::: {.callout-tip}
+## Instructor note
+Have everyone identify the **Console** vs the **Source** editor. New learners often type into the
+wrong pane. Encourage writing in the Source editor and sending lines with Ctrl/Cmd+Enter — it's
+the reproducible habit.
+:::
+
+## R as a calculator (live coding)
+
+```r
+1 + 100
+3 + 5 * 2          # multiplication before addition
+(3 + 5) * 2        # parentheses change precedence
+2^10               # exponentiation
+7 %% 3             # modulo (remainder) -> 1
+```
+
+Comparisons return logical values:
+
+```r
+1 == 1             # TRUE
+1 != 2             # TRUE
+3 > 2 & 2 > 1      # TRUE AND TRUE -> TRUE
+```
+
+## Variables and assignment
+
+R's idiomatic assignment operator is `<-` (RStudio shortcut: Alt/Option + `-`):
+
+```r
+weight_kg <- 55
+weight_kg                      # print it
+weight_kg * 2.2                # convert to pounds
+weight_lb <- weight_kg * 2.2   # store the result
+```
+
+Names are case-sensitive and should be descriptive. Prefer `snake_case`.
+
+::: {.callout-note collapse="true"}
+## Challenge 1 — Predict and check
+What do these print? Predict, then run them.
+
+```r
+mass <- 47.5
+age  <- 122
+mass <- mass * 2.3
+age  <- age - 20
+mass > age
+```
+
+### Solution
+`mass` becomes `109.25`, `age` becomes `102`, so `mass > age` is `TRUE`. Reassignment uses the
+*current* value on the right-hand side before storing the new one.
+:::
+
+## Types
+
+Every value has a type. Check with `class()`:
+
+```r
+class(3.14)        # "numeric"
+class(1L)          # "integer"  (the L suffix)
+class(TRUE)        # "logical"
+class("forge")     # "character"
+```
+
+Knowing types matters because operations and functions behave differently per type — and
+type mistakes are a top source of bugs.
+
+::: {.callout-important}
+## Key points
+- Write code in the Source editor; send lines to the Console (Ctrl/Cmd+Enter).
+- Use `<-` to assign; prefer descriptive `snake_case` names.
+- Everything has a `class()`; types drive behavior.
+:::
+
+Next: [Episode 2 — Project Management & Reproducibility](r-02-project-management.qmd).

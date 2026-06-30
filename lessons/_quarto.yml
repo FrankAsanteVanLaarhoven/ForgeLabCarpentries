@@ -29,11 +29,28 @@ website:
   sidebar:
     style: docked
     contents:
-      - section: "Episodes"
+      - section: "Foundations & Robotics"
         contents:
           - episodes/01-intro-unix-shell.qmd
           - episodes/02-git-version-control.qmd
           - episodes/03-ros2-navigation.qmd
+      - section: "R for Reproducible Science"
+        contents:
+          - episodes/r-01-intro-r-rstudio.qmd
+          - episodes/r-02-project-management.qmd
+          - episodes/r-03-seeking-help.qmd
+          - episodes/r-04-data-structures.qmd
+          - episodes/r-05-exploring-data-frames.qmd
+          - episodes/r-06-subsetting-data.qmd
+          - episodes/r-07-control-flow.qmd
+          - episodes/r-08-ggplot2.qmd
+          - episodes/r-09-vectorization.qmd
+          - episodes/r-10-functions.qmd
+          - episodes/r-11-reading-writing-data.qmd
+          - episodes/r-12-dplyr.qmd
+          - episodes/r-13-tidyr.qmd
+          - episodes/r-14-quarto-reports.qmd
+          - episodes/r-15-writing-good-software.qmd
   page-footer:
     center: "Content CC-BY 4.0 · Code MIT · ForgeLab Carpentries"
 

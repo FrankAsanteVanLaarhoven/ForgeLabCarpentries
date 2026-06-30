@@ -1,0 +1,101 @@
+---
+title: "R Episode 15 — Writing Good Software"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Apply naming, style, and structure conventions that aid reuse.
+- Write automated tests with `testthat`.
+- Pull the track's reproducibility practices together: style, tests, `renv`, Git, CI.
+
+**Teaching:** 35 min · **Exercises:** 25 min
+:::
+
+This capstone episode ties the whole track together: the goal is analysis code that *another
+person* (including future-you) can read, trust, and rerun.
+
+## Style and structure
+
+- Use descriptive `snake_case` names; functions are verbs (`load_gapminder`), data are nouns.
+- Keep functions small and single-purpose (Episode 10); put them in `R/`.
+- Don't repeat yourself — factor shared logic into functions.
+- Format automatically and catch issues with linters:
+
+```r
+styler::style_dir("R")     # auto-format to a consistent style
+lintr::lint_dir("R")       # flag style/code smells
+```
+
+## Write tests with testthat
+
+Tests turn "I think it works" into "it's verified, and stays verified":
+
+```r
+# R/temperature.R
+fahr_to_celsius <- function(temp) (temp - 32) * 5 / 9
+
+# tests/testthat/test-temperature.R
+library(testthat)
+test_that("fahr_to_celsius converts known points", {
+  expect_equal(fahr_to_celsius(32), 0)
+  expect_equal(fahr_to_celsius(212), 100)
+})
+```
+
+Run them with `testthat::test_dir("tests/testthat")` (or `devtools::test()` in a package).
+
+::: {.callout-tip}
+## Instructor note
+Write the test for `fahr_to_celsius` *before* fixing a deliberately broken version, so learners
+see a red test go green. Tests are most convincing when they first catch a real bug.
+:::
+
+## Reproducibility, assembled
+
+Everything from this track combines into a reproducible project:
+
+| Practice | Tool | Episode |
+|----------|------|---------|
+| Self-contained project, root-relative paths | `usethis`, `here` | 2 |
+| Pinned dependencies | `renv` (`renv.lock`) | 2 |
+| Functions over copy-paste | functions | 10 |
+| Consistent style | `styler`, `lintr` | 15 |
+| Automated tests | `testthat` | 15 |
+| Reproducible reports | Quarto | 14 |
+| Version control + automation | Git, GitHub Actions (CI) | Foundations |
+
+## Wire up CI
+
+A tiny GitHub Actions workflow can run your tests on every push — the same idea as this repo's
+CI. Combined with `renv::restore()`, contributors get your exact environment and immediate
+feedback.
+
+::: {.callout-note collapse="true"}
+## Challenge — Make it fail, then pass
+Write a `test_that()` for `celsius_to_kelvin()` (adds 273.15). Run it against a buggy version
+that adds `273` and watch it fail; fix the function and watch it pass.
+
+### Solution
+
+```r
+celsius_to_kelvin <- function(temp) temp + 273.15
+test_that("0C is 273.15K", {
+  expect_equal(celsius_to_kelvin(0), 273.15)
+})
+```
+The buggy `+ 273` version fails `expect_equal()`; the corrected one passes.
+:::
+
+::: {.callout-important}
+## Key points
+- Readable, consistent, DRY code is reusable code — automate style with `styler`/`lintr`.
+- `testthat` makes correctness verifiable and durable.
+- Reproducibility is the sum of the track: projects, `here`, `renv`, functions, tests, Quarto,
+  Git, and CI.
+:::
+
+This completes the **R for Reproducible Science** track. Combine it with a
+[Capstone](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/curriculum/tracks/capstones-certification.md)
+to earn a micro-credential.

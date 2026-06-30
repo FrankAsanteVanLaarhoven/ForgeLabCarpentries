@@ -1,0 +1,98 @@
+---
+title: "R Episode 2 — Project Management & Reproducibility"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Create a self-contained RStudio/Positron project.
+- Organize files with a consistent, reproducible layout.
+- Refer to files with `here::here()` instead of `setwd()`.
+- Pin package versions with `renv` so others can reproduce your environment.
+
+**Teaching:** 30 min · **Exercises:** 20 min
+:::
+
+## Why projects?
+
+Reproducibility starts with a **self-contained project**: one folder holding your code, data,
+and outputs, with paths that work on anyone's machine. This is the difference between "it works
+on my laptop" and "it works."
+
+## Create a project
+
+In RStudio: *File ▸ New Project ▸ New Directory ▸ New Project*. Or, reproducibly, from the
+console with **usethis**:
+
+```r
+install.packages(c("usethis", "here", "renv"))
+usethis::create_project("~/projects/gapminder-analysis")
+```
+
+A suggested layout:
+
+```
+gapminder-analysis/
+├── gapminder-analysis.Rproj
+├── data/            # raw, read-only inputs
+├── R/               # functions and scripts
+├── analysis/        # .qmd reports
+├── output/          # generated figures/tables (git-ignored)
+└── renv.lock        # pinned dependencies
+```
+
+## Stop using setwd(): use here()
+
+Hard-coded paths like `setwd("/Users/me/...")` break on every other machine. Instead, **`here`**
+builds paths relative to the project root:
+
+```r
+library(here)
+here()                              # the project root
+read_csv(here("data", "gapminder.csv"))
+```
+
+::: {.callout-tip}
+## Instructor note
+This is the single most impactful reproducibility habit for new R users. Show how `here()`
+returns the same correct path whether the script is run from the console, a Quarto render, or a
+scheduled job — `setwd()` cannot.
+:::
+
+## Pin your environment with renv
+
+`renv` records the exact package versions your project uses in a `renv.lock` file:
+
+```r
+renv::init()        # snapshot current packages into renv.lock
+# ... install/upgrade packages as you work ...
+renv::snapshot()    # update the lockfile
+renv::restore()     # a collaborator reproduces your exact versions
+```
+
+Commit `renv.lock` to Git so anyone can recreate your environment.
+
+::: {.callout-note collapse="true"}
+## Challenge — Make it portable
+Your script begins with `setwd("C:/Users/sam/gap")` and `read.csv("gap/data.csv")`. Rewrite it
+to be portable across machines.
+
+### Solution
+
+```r
+library(here)
+library(readr)
+read_csv(here("data", "data.csv"))   # no setwd, root-relative path
+```
+Combined with `renv::restore()` for packages, the project now runs anywhere.
+:::
+
+::: {.callout-important}
+## Key points
+- Work inside a self-contained project; keep raw data read-only.
+- Use `here::here()` for paths; never `setwd()`.
+- `renv` pins package versions — commit `renv.lock` for true reproducibility.
+:::
+
+Next: [Episode 3 — Seeking Help](r-03-seeking-help.qmd).

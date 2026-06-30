@@ -1,0 +1,99 @@
+---
+title: "R Episode 10 — Functions Explained"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Define functions with arguments, defaults, and return values.
+- Understand scope (what a function can and can't see).
+- Document a function so others (and future-you) can use it.
+
+**Teaching:** 35 min · **Exercises:** 25 min
+:::
+
+## Defining a function
+
+```r
+fahr_to_celsius <- function(temp) {
+  (temp - 32) * 5 / 9
+}
+
+fahr_to_celsius(32)     # 0
+fahr_to_celsius(212)    # 100
+```
+
+The last evaluated expression is returned automatically; use `return()` for early exits.
+
+## Arguments and defaults
+
+```r
+gdp_total <- function(gapminder, year = NULL) {
+  data <- gapminder
+  if (!is.null(year)) {
+    data <- data[data$year == year, ]
+  }
+  data$pop * data$gdpPercap
+}
+```
+
+Defaults make functions flexible: callers can rely on sensible behavior or override it.
+
+## Scope
+
+Variables created inside a function are local — they don't leak out, and the function can't see
+your console variables unless you pass them in:
+
+```r
+f <- function() { y <- 10; y }
+f()        # 10
+# y        # Error: object 'y' not found  (y is local to f)
+```
+
+::: {.callout-tip}
+## Instructor note
+Emphasize "pass data in, return results out" — never rely on global state. This is the habit that
+makes functions testable (Episode 15) and reusable. Show how a function that reads a global
+variable breaks the moment that variable changes.
+:::
+
+## Documenting functions
+
+Write a short comment describing purpose, parameters, and return value. For packages, the
+**roxygen2** style turns these into real help pages:
+
+```r
+#' Convert Fahrenheit to Celsius
+#'
+#' @param temp Numeric vector of temperatures in Fahrenheit.
+#' @return Numeric vector of temperatures in Celsius.
+fahr_to_celsius <- function(temp) {
+  (temp - 32) * 5 / 9
+}
+```
+
+::: {.callout-note collapse="true"}
+## Challenge — Compose functions
+Write `celsius_to_kelvin()` (add 273.15), then a `fahr_to_kelvin()` that *reuses*
+`fahr_to_celsius()` and `celsius_to_kelvin()`.
+
+### Solution
+
+```r
+celsius_to_kelvin <- function(temp) temp + 273.15
+fahr_to_kelvin <- function(temp) celsius_to_kelvin(fahr_to_celsius(temp))
+fahr_to_kelvin(212)   # 373.15
+```
+Composing small functions beats one big one — each piece is testable.
+:::
+
+::: {.callout-important}
+## Key points
+- `function(args) { body }`; the last expression is returned.
+- Defaults make functions flexible; pass data in, return results out.
+- Function scope is local — avoid relying on globals.
+- Document purpose, `@param`, and `@return`; compose small functions.
+:::
+
+Next: [Episode 11 — Reading & Writing Data](r-11-reading-writing-data.qmd).

@@ -1,0 +1,89 @@
+---
+title: "R Episode 3 — Seeking Help"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Read R's built-in help and function signatures.
+- Find vignettes and package documentation.
+- Write a minimal reproducible example (reprex) to ask good questions.
+- Use AI assistants effectively *and* critically.
+
+**Teaching:** 20 min · **Exercises:** 15 min
+:::
+
+## Built-in help
+
+```r
+?read_csv          # help for a function
+help(read_csv)     # equivalent
+?"+"               # help for an operator (quote it)
+args(round)        # just the arguments
+example(mean)      # run the documented examples
+```
+
+The help page sections to read first: **Usage** (the signature), **Arguments**, and
+**Examples** at the bottom — copy an example and adapt it.
+
+## Discovering and exploring packages
+
+```r
+vignette()                 # list available long-form guides
+vignette("dplyr")          # open a package's vignette
+help(package = "tidyr")    # everything a package exposes
+??"linear model"           # fuzzy search across installed help
+```
+
+## Ask good questions: the reprex
+
+When you're stuck, a **minimal reproducible example** gets you answers fastest — and often
+solves the problem yourself while making it. The `reprex` package formats one for pasting into
+issues or forums:
+
+```r
+install.packages("reprex")
+# Copy a small, self-contained snippet, then:
+reprex::reprex()
+```
+
+A good reprex is **minimal** (only the failing bit), **self-contained** (loads its packages and
+makes its own tiny data), and **reproducible** (someone else can run it).
+
+::: {.callout-tip}
+## Instructor note
+Demonstrate turning a vague "it doesn't work" into a 5-line reprex. The act of minimizing is
+itself a debugging technique — many learners find the bug before they finish.
+:::
+
+## Using AI assistants well
+
+AI chat assistants can speed up R work — explaining errors, drafting functions, suggesting
+tidyverse idioms. Use them, but **verify**:
+
+- Run the code; check it does what you intended on *your* data.
+- Confirm functions/arguments exist (APIs drift; assistants can hallucinate).
+- Prefer official docs/vignettes as the source of truth for behavior.
+
+::: {.callout-note collapse="true"}
+## Challenge — Decode a signature
+Run `?seq`. Using only the help page, write a call that produces `2, 4, 6, 8, 10`.
+
+### Solution
+
+```r
+seq(from = 2, to = 10, by = 2)
+# or positionally: seq(2, 10, 2)
+```
+:::
+
+::: {.callout-important}
+## Key points
+- `?fn`, `args()`, and the Examples section answer most questions.
+- Vignettes give task-oriented, narrative guidance.
+- A minimal reprex gets better help — and often self-solves.
+- Treat AI output as a draft to verify, not an authority.
+:::
+
+Next: [Episode 4 — Data Structures](r-04-data-structures.qmd).

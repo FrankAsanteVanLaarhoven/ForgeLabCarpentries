@@ -1,0 +1,95 @@
+---
+title: "R Episode 8 — Publication-Quality Graphics with ggplot2"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Build a plot with the grammar of graphics: data, aesthetics, geoms.
+- Map variables to color, size, and facets.
+- Add scales, labels, and themes for publication quality.
+
+**Teaching:** 40 min · **Exercises:** 30 min
+:::
+
+## The grammar of graphics
+
+Every ggplot has three core parts: **data**, **aesthetic mappings** (`aes()`), and one or more
+**geoms** (layers). You add layers with `+`.
+
+```r
+library(ggplot2)
+
+ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) +
+  geom_point()
+```
+
+## Mapping more variables
+
+```r
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp, color = continent, size = pop)) +
+  geom_point(alpha = 0.6) +
+  scale_x_log10()                      # GDP is highly skewed
+```
+
+::: {.callout-tip}
+## Instructor note
+Distinguish **mapping** an aesthetic (inside `aes()`, driven by data) from **setting** it (outside
+`aes()`, a constant like `alpha = 0.6`). Putting a constant inside `aes()` is the #1 ggplot
+confusion — it creates a spurious legend.
+:::
+
+## Facets: small multiples
+
+```r
+ggplot(gapminder, aes(x = year, y = lifeExp, group = country)) +
+  geom_line(alpha = 0.3) +
+  facet_wrap(~ continent)
+```
+
+## Publication polish
+
+```r
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp, color = continent)) +
+  geom_point(alpha = 0.6) +
+  scale_x_log10(labels = scales::dollar) +
+  labs(
+    title = "Wealth and life expectancy",
+    x = "GDP per capita (log scale)",
+    y = "Life expectancy (years)",
+    color = "Continent"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+Save with `ggsave()` at a defined size and resolution for reproducible figures:
+
+```r
+ggsave(here::here("output", "wealth-lifeexp.png"), width = 8, height = 5, dpi = 300)
+```
+
+::: {.callout-note collapse="true"}
+## Challenge — Trends over time
+Make a line plot of `lifeExp` over `year` for the countries of Oceania, colored by country.
+
+### Solution
+
+```r
+oceania <- gapminder[gapminder$continent == "Oceania", ]
+ggplot(oceania, aes(x = year, y = lifeExp, color = country)) +
+  geom_line() +
+  labs(y = "Life expectancy", color = "Country") +
+  theme_minimal()
+```
+:::
+
+::: {.callout-important}
+## Key points
+- ggplot = data + `aes()` mappings + geom layers, combined with `+`.
+- Map variables inside `aes()`; set constants outside it.
+- `facet_wrap()` makes small multiples; `labs()`, `scale_*`, and `theme_*` give polish.
+- `ggsave()` exports reproducible figures at a fixed size/DPI.
+:::
+
+Next: [Episode 9 — Vectorization](r-09-vectorization.qmd).

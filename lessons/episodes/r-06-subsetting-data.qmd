@@ -1,0 +1,81 @@
+---
+title: "R Episode 6 — Subsetting Data"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Subset vectors by position, name, and logical condition.
+- Subset data frames by rows and columns.
+- Understand the difference between `[`, `[[`, and `$`.
+
+**Teaching:** 35 min · **Exercises:** 25 min
+:::
+
+## Subsetting vectors
+
+```r
+x <- c(a = 5.4, b = 6.2, c = 7.1, d = 4.8)
+
+x[1]              # by position
+x[c(1, 3)]        # multiple positions
+x[-1]             # drop the first element
+x["b"]            # by name
+x[x > 6]          # by logical condition  -> b, c
+```
+
+Logical subsetting is the workhorse — build a condition, use it to filter:
+
+```r
+big <- x > 6
+x[big]
+```
+
+## Subsetting data frames
+
+A data frame is two-dimensional: `df[rows, cols]`.
+
+```r
+gapminder[1:3, ]            # first 3 rows, all columns
+gapminder[, c("country", "year")]   # all rows, two columns
+gapminder[gapminder$year == 2007, ] # rows matching a condition
+```
+
+`$` and `[[` extract a single column as a vector; `[` keeps it a data frame:
+
+```r
+gapminder$lifeExp          # a numeric vector
+gapminder[["lifeExp"]]     # same vector
+gapminder["lifeExp"]       # a one-column data frame
+```
+
+::: {.callout-tip}
+## Instructor note
+The `[` vs `[[` distinction confuses everyone at first: `[` keeps the container type, `[[` reaches
+*inside* to pull one element out. Most "why is this still a data frame?" bugs trace back here.
+Note that Episode 12 (dplyr) gives a more readable way to do all of this with `filter()`/`select()`.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge — Filter by condition
+From `gapminder`, select the rows for Norway. Then select only the `year` and `lifeExp` columns
+for those rows.
+
+### Solution
+
+```r
+norway <- gapminder[gapminder$country == "Norway", ]
+norway[, c("year", "lifeExp")]
+```
+(In Episode 12 this becomes `gapminder |> filter(country == "Norway") |> select(year, lifeExp)`.)
+:::
+
+::: {.callout-important}
+## Key points
+- Subset vectors by position, name, or logical condition.
+- Data frames use `df[rows, cols]`.
+- `[` keeps the container; `[[` and `$` extract a single element/column.
+:::
+
+Next: [Episode 7 — Control Flow](r-07-control-flow.qmd).

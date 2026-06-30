@@ -1,0 +1,102 @@
+---
+title: "R Episode 14 — Producing Reports with Quarto"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Create a Quarto document that mixes prose, code, and output.
+- Control code execution with chunk options.
+- Render to HTML/PDF/Word reproducibly.
+
+**Teaching:** 35 min · **Exercises:** 25 min
+:::
+
+## Why Quarto (not knitr/R Markdown)?
+
+The original lesson taught **knitr** with R Markdown. We teach **Quarto** — the modern successor
+from Posit. It's the *same* literate-programming idea (code + prose → a rendered document) but
+multi-language, more capable, and it's the engine behind this very site. R Markdown still works;
+Quarto is where new development happens.
+
+::: {.callout-tip}
+## Instructor note
+Learners on this site are already reading Quarto output — point that out. The skill they learn
+here is the same one that publishes ForgeLab lessons.
+:::
+
+## Anatomy of a .qmd
+
+A Quarto document has a **YAML header**, **prose** (Markdown), and **code chunks**:
+
+```` markdown
+---
+title: "Gapminder Report"
+author: "Your Name"
+format: html
+---
+
+## Life expectancy over time
+
+```{r}
+library(dplyr)
+library(ggplot2)
+gapminder <- readr::read_csv(here::here("data", "gapminder.csv"))
+```
+
+The dataset has `r nrow(gapminder)` rows. Below, life expectancy rises over time:
+
+```{r}
+#| label: fig-life
+#| fig-cap: "Life expectancy by continent."
+#| echo: false
+ggplot(gapminder, aes(year, lifeExp, group = country)) +
+  geom_line(alpha = 0.2) +
+  facet_wrap(~ continent)
+```
+````
+
+Note the **inline code** `` `r nrow(gapminder)` `` — numbers in your prose come straight from the
+data and never go stale.
+
+## Chunk options
+
+Modern Quarto uses `#|` option comments inside the chunk:
+
+```r
+#| echo: false      # hide the code, show the output
+#| warning: false   # suppress warnings
+#| cache: true      # cache expensive chunks
+#| fig-width: 8
+```
+
+## Render
+
+```bash
+quarto render report.qmd               # to the default format (html)
+quarto render report.qmd --to pdf      # or pdf / docx
+```
+
+Because the report regenerates from code + data, updating the data and re-rendering updates every
+number, table, and figure — no manual copy-paste, no drift.
+
+::: {.callout-note collapse="true"}
+## Challenge — A reproducible figure caption
+Add an inline value to your report's prose that always reflects the data: the number of distinct
+countries. What do you write?
+
+### Solution
+
+In the prose: `` This report covers `r length(unique(gapminder$country))` countries. `` — it
+recomputes on every render.
+:::
+
+::: {.callout-important}
+## Key points
+- Quarto mixes prose, code chunks, and inline code into one reproducible document.
+- Control chunks with `#|` options (`echo`, `warning`, `cache`, `fig-*`).
+- `quarto render` outputs HTML/PDF/Word; re-rendering keeps results in sync with data.
+:::
+
+Next: [Episode 15 — Writing Good Software](r-15-writing-good-software.qmd).

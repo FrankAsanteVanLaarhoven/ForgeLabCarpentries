@@ -1,0 +1,97 @@
+---
+title: "R Episode 4 — Data Structures"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Create and combine atomic vectors and understand coercion.
+- Use factors for categorical data (and know their gotchas).
+- Use lists to hold mixed types.
+- Inspect any object's structure with `str()`.
+
+**Teaching:** 35 min · **Exercises:** 20 min
+:::
+
+## Atomic vectors
+
+A vector holds values of **one** type. Build one with `c()`:
+
+```r
+weights <- c(50, 60, 65, 82)
+weights
+length(weights)
+class(weights)        # "numeric"
+```
+
+Mixing types triggers **coercion** to the most flexible type — a frequent source of surprise:
+
+```r
+mixed <- c(1, "two", TRUE)
+class(mixed)          # "character" — everything became a string
+```
+
+The coercion hierarchy: logical → integer → numeric → character. Knowing it prevents bugs.
+
+## Sequences and naming
+
+```r
+1:5                       # 1 2 3 4 5
+seq(0, 1, by = 0.25)      # 0.00 0.25 0.50 0.75 1.00
+v <- c(a = 1, b = 2)      # named vector
+names(v)                  # "a" "b"
+```
+
+## Factors: categorical data
+
+Factors represent categories with a fixed set of **levels**:
+
+```r
+group <- factor(c("low", "high", "low", "mid"),
+                levels = c("low", "mid", "high"))
+levels(group)
+table(group)
+```
+
+::: {.callout-tip}
+## Instructor note
+Two classic gotchas: (1) factors print like strings but are stored as integers; (2) reading old
+data with `read.csv()` once auto-converted strings to factors. Modern `readr::read_csv()` does
+**not** — it keeps character columns, which is what you usually want.
+:::
+
+## Lists: mixed types
+
+A list can hold elements of different types and lengths — including other lists:
+
+```r
+person <- list(name = "Ada", age = 36L, langs = c("R", "Python"))
+person$name
+person[["langs"]]
+str(person)           # the most useful inspection function in R
+```
+
+::: {.callout-note collapse="true"}
+## Challenge — What type results?
+Predict the `class()` of each, then check:
+
+```r
+c(2, 6, "3")
+c(TRUE, FALSE, 1)
+c(2L, 3.5)
+```
+
+### Solution
+`"character"` (string wins), `"numeric"` (logical → numeric: `1 0 1`), `"numeric"` (integer →
+numeric). Coercion always moves toward the more flexible type.
+:::
+
+::: {.callout-important}
+## Key points
+- Atomic vectors are one type; mixing coerces to the most flexible type.
+- Factors encode categories with explicit `levels`.
+- Lists hold mixed types; `str()` reveals any object's structure.
+:::
+
+Next: [Episode 5 — Exploring Data Frames](r-05-exploring-data-frames.qmd).

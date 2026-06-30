@@ -1,0 +1,89 @@
+---
+title: "R Episode 9 — Vectorization"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Apply operations to whole vectors at once.
+- Use logical vectors for counting and filtering.
+- Replace explicit loops with `purrr::map` when iterating.
+
+**Teaching:** 30 min · **Exercises:** 20 min
+:::
+
+## Operate on whole vectors
+
+R operations are **vectorized** — they apply element-wise without a loop:
+
+```r
+x <- 1:5
+x * 2             # 2 4 6 8 10
+x + x             # 2 4 6 8 10
+sqrt(x)           # element-wise
+```
+
+This is shorter, faster, and clearer than looping over indices.
+
+## Logical vectors are powerful
+
+A comparison produces a logical vector you can sum or use to filter:
+
+```r
+high <- gapminder$lifeExp > 70
+sum(high)         # TRUE counts as 1 -> how many observations exceed 70
+mean(high)        # proportion exceeding 70
+gapminder$gdpPercap[high]   # filter by the logical vector
+```
+
+::: {.callout-tip}
+## Instructor note
+`sum()`/`mean()` of a logical vector is a beautiful idiom for "how many / what fraction satisfy
+this condition?" Show it explicitly — learners coming from other languages reach for a loop+counter.
+:::
+
+## Recycling (and its trap)
+
+Shorter vectors are *recycled* to match longer ones:
+
+```r
+c(1, 2, 3, 4) + c(10, 20)     # 11 22 13 24  (10,20 recycled)
+```
+
+Handy, but a mismatch in lengths that don't divide evenly warns — read those warnings.
+
+## When you must iterate: map, not for
+
+For applying a function across elements/list items, `purrr::map_*` is explicit about the output
+type and avoids manual index bookkeeping:
+
+```r
+library(purrr)
+files <- c("a.csv", "b.csv")
+# map(files, read_csv)            # returns a list of tibbles
+sizes <- map_dbl(1:5, \(n) n^2)   # 1 4 9 16 25  (anonymous function)
+```
+
+::: {.callout-note collapse="true"}
+## Challenge — Count without a loop
+How many gapminder observations have `gdpPercap` above 20000? What fraction is that?
+
+### Solution
+
+```r
+rich <- gapminder$gdpPercap > 20000
+sum(rich)
+mean(rich)
+```
+:::
+
+::: {.callout-important}
+## Key points
+- Most R operations are vectorized — prefer them to loops.
+- `sum()`/`mean()` of a logical vector counts/proportions matches.
+- Beware recycling; heed length-mismatch warnings.
+- Use `purrr::map_*()` for explicit, typed iteration.
+:::
+
+Next: [Episode 10 — Functions Explained](r-10-functions.qmd).

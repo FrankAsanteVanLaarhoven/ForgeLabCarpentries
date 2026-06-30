@@ -1,0 +1,86 @@
+---
+title: "R Episode 11 — Reading & Writing Data"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Import tabular data with `readr`, controlling column types.
+- Write results and figures to disk reproducibly.
+- Separate read-only inputs from generated outputs.
+
+**Teaching:** 25 min · **Exercises:** 20 min
+:::
+
+## Reading data with readr
+
+```r
+library(readr)
+library(here)
+
+gapminder <- read_csv(here("data", "gapminder.csv"))
+```
+
+`read_csv()` prints and guesses column types. When a guess is wrong, **be explicit** — this is a
+reproducibility safeguard:
+
+```r
+gapminder <- read_csv(
+  here("data", "gapminder.csv"),
+  col_types = cols(year = col_integer(), country = col_character())
+)
+```
+
+Other importers: `read_tsv()`, `read_delim()`, and **readxl**'s `read_excel()` for spreadsheets.
+
+## Writing data
+
+```r
+library(dplyr)
+
+recent <- gapminder |> filter(year >= 2000)
+write_csv(recent, here("output", "gapminder_recent.csv"))
+```
+
+::: {.callout-tip}
+## Instructor note
+Reinforce the project discipline from Episode 2: **`data/` is read-only**, **`output/` is
+generated** (and git-ignored). If you can delete `output/` and regenerate it by re-running your
+code, your analysis is reproducible.
+:::
+
+## Saving figures and R objects
+
+```r
+ggplot2::ggsave(here("output", "fig1.png"), width = 8, height = 5, dpi = 300)
+
+saveRDS(recent, here("output", "recent.rds"))   # exact R object
+recent2 <- readRDS(here("output", "recent.rds"))
+```
+
+Use CSV for interoperability; use `.rds` when you need to preserve exact R types.
+
+::: {.callout-note collapse="true"}
+## Challenge — Round-trip
+Filter `gapminder` to African countries, write it to `output/africa.csv`, then read it back and
+confirm the row count matches.
+
+### Solution
+
+```r
+africa <- gapminder |> filter(continent == "Africa")
+write_csv(africa, here("output", "africa.csv"))
+back <- read_csv(here("output", "africa.csv"))
+nrow(africa) == nrow(back)   # TRUE
+```
+:::
+
+::: {.callout-important}
+## Key points
+- `read_csv()` imports and reports types; set `col_types` when guesses are wrong.
+- `write_csv()` for portability; `saveRDS()`/`readRDS()` to preserve R types.
+- Keep `data/` read-only and `output/` regenerable — that's reproducibility.
+:::
+
+Next: [Episode 12 — Data Manipulation with dplyr](r-12-dplyr.qmd).

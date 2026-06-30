@@ -11,6 +11,7 @@ Tracks are modular: a workshop can be a single track, a slice of one, or a blend
 |-------|------|---------|--------|
 | Foundations | [tracks/foundations.md](tracks/foundations.md) | none | episodes live |
 | Robotics & Autonomy | [tracks/robotics-autonomy.md](tracks/robotics-autonomy.md) | Foundations | episode 3 live |
+| R for Reproducible Science | [tracks/r-reproducible-science.md](tracks/r-reproducible-science.md) | Foundations (recommended) | 15 episodes live |
 | AI & World Models | [tracks/ai-world-models.md](tracks/ai-world-models.md) | Foundations + Python | outline |
 | Cloud & Deployment | [tracks/cloud-deployment.md](tracks/cloud-deployment.md) | Foundations | outline |
 | Blockchain | [tracks/blockchain.md](tracks/blockchain.md) | Foundations | outline |
@@ -19,11 +20,13 @@ Tracks are modular: a workshop can be a single track, a slice of one, or a blend
 ## Learning pathways
 
 ```
-Foundations ─┬─▶ Robotics & Autonomy ─┐
-             │                         ├─▶ Capstones & Certification
-             ├─▶ AI & World Models ────┤
-             ├─▶ Cloud & Deployment ───┤
-             └─▶ Blockchain ───────────┘
+Foundations ─┬─▶ Robotics & Autonomy ──────┐
+             │                              │
+             ├─▶ R for Reproducible Science ┤
+             │                              ├─▶ Capstones & Certification
+             ├─▶ AI & World Models ─────────┤
+             ├─▶ Cloud & Deployment ────────┤
+             └─▶ Blockchain ────────────────┘
 ```
 
 Most learners start with **Foundations**, then choose one or more specialization tracks, and
