@@ -1,0 +1,194 @@
+---
+title: "AI Episode 11 — Language Models as Robot Interfaces"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Explain what it means to use a language model as a *robot interface* — and what it is **not** for.
+- Turn a free-form instruction into a **structured, schema-validated** plan.
+- Expose robot capabilities to a model with **tool / function calling**.
+- Validate a model's output before it touches a robot, and evaluate parsing honestly.
+
+**Teaching:** 45 min · **Exercises:** 30 min · **Builds on:** Foundations + Python · **Leads into:** [Ep 12 — VLN](ai-12-vln.qmd)
+:::
+
+## Why a language model as an interface?
+
+Robots already know how to *act* — navigate to a pose, drive `cmd_vel`, close a gripper. What they
+lack is a way to turn **human intent** ("tidy the table, then meet me by the door") into those
+actions. A language model is good at exactly that translation: **instruction → structured plan**.
+
+The key mental shift: the LM is a **translator and planner**, not a controller. It never drives the
+robot directly. It emits a *plan* that your code validates and executes against interfaces you
+already trust.
+
+```
+instruction ─▶ [language model] ─▶ structured plan ─▶ [validate] ─▶ [execute via tools] ─▶ robot
+                     ▲                                                      │
+                     └──────────────── tool results / state ◀──────────────┘
+```
+
+Episodes 12 (VLN) and 13 (VLA) both sit on top of this pattern — they are specialisations of
+"instruction → validated plan → trusted interface". Get this episode right and those compose cleanly.
+
+## Step 1 — A provider-agnostic wrapper
+
+Never scatter a vendor's SDK through your codebase. Define **one** function and swap the backend
+behind it — this keeps lessons reproducible and lets a workshop run on whatever model is available:
+
+```python
+# llm_backend.py — one seam for the whole system
+def call_llm_json(prompt: str, schema: dict) -> dict:
+    """Send `prompt`, require a response matching `schema`, return parsed JSON.
+    Implement with your preferred provider; document the model ID + cost in setup.
+    """
+    raw = _provider_complete(prompt)        # the only vendor-specific line
+    return validate_json(raw, schema)       # raises on malformed / off-schema output
+```
+
+::: {.callout-tip}
+## Instructor note
+Have learners name the model ID and its cost out loud before the first call. "Provider-agnostic"
+is not "provider-ignorant" — reproducibility means knowing *which* model produced a result. Pin the
+model ID in `setup`, not in prose.
+:::
+
+## Step 2 — Structured output, not prose
+
+A paragraph of advice is unusable downstream; a validated object is executable. Ask the model for
+JSON that conforms to a schema you own, and **reject anything that doesn't fit**:
+
+```python
+PLAN_SCHEMA = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "action": {"enum": ["go_to", "pick", "place", "say", "stop"]},
+            "args": {"type": "object"},
+        },
+        "required": ["action"],
+    },
+}
+
+def parse_instruction(instruction: str) -> list[dict]:
+    prompt = (
+        "You are a robot task planner. Return ONLY a JSON array of steps using "
+        "actions go_to/pick/place/say/stop.\n"
+        f"Instruction: {instruction}"
+    )
+    return call_llm_json(prompt, PLAN_SCHEMA)   # schema-valid or it raises
+```
+
+The schema is the contract. If the model returns `"action": "teleport"`, validation fails *here* —
+before anything reaches the robot — instead of surfacing as undefined behaviour mid-task.
+
+## Step 3 — Tool / function calling
+
+Structured output describes *what* to do; tool calling lets the model *invoke* the capabilities you
+expose — and nothing else. You hand the model a typed menu and it picks from it:
+
+```python
+TOOLS = {
+    "go_to":  {"args": {"landmark": "str"}},   # → Nav2 NavigateToPose (see Robotics Ep 3)
+    "pick":   {"args": {"object": "str"}},     # → manipulation stack
+    "say":    {"args": {"text": "str"}},       # → TTS / log
+}
+
+def run_tool(call: dict):
+    name, args = call["action"], call.get("args", {})
+    if name not in TOOLS:
+        raise ValueError(f"model called unknown tool: {name!r}")   # allow-list, not deny-list
+    return DISPATCH[name](**args)
+```
+
+A concrete round-trip — the model picks from the menu, your code executes it:
+
+```python
+plan = parse_instruction("pick up the mug and tell me when you have it")
+# model returns (schema-valid):
+#   [{"action": "pick", "args": {"object": "mug"}},
+#    {"action": "say",  "args": {"text": "got the mug"}}]
+run_tool(plan[0])   # → DISPATCH["pick"](object="mug")    → manipulation stack
+run_tool(plan[1])   # → DISPATCH["say"](text="got the mug") → TTS / log
+```
+
+The allow-list is the safety boundary: the model can only ever request capabilities you chose to
+register. An unknown tool name is a *bug to surface*, never a thing to improvise.
+
+## Step 4 — Validate before you act
+
+Put every guardrail *between* the model and the hardware, never after:
+
+```python
+plan = parse_instruction("clear the table and let me know when done")
+for step in plan:                       # already schema-valid from Step 2
+    if step["action"] == "stop":
+        break
+    if not preconditions_ok(step):      # is the target known? is the arm clear?
+        request_clarification(step)     # don't guess — ask or skip, then re-plan
+        continue
+    run_tool(step)
+```
+
+Two non-negotiables: **(1)** the model's output is validated structure, and **(2)** execution checks
+preconditions and degrades safely. A language agent that hallucinates a step should fail *loudly at
+the boundary*, not drive a robot into a wall. In a safety-critical system this boundary **is** the
+safety case: every actuation is gated by a check your team reviewed, so an unvalidated or
+hallucinated plan can never reach hardware.
+
+## Step 5 — Evaluate the parser honestly
+
+Demos lie; metrics don't. Evaluate the *interface*, separately from the robot:
+
+| Metric | Meaning |
+|--------|---------|
+| **Schema-valid rate** | fraction of responses that parse against the schema on the first try |
+| **Plan accuracy** | fraction of plans that match a human-labelled reference for held-out instructions |
+| **Tool-error rate** | fraction of steps requesting an unregistered/invalid tool |
+| **Clarification rate** | how often the system correctly *refuses* to guess |
+
+Report these on a held-out instruction set, and keep a **failure taxonomy** (parse error vs wrong
+plan vs unsafe step). Knowing *why* the interface fails is what tells you whether to fix the prompt,
+the schema, or the grounding.
+
+::: {.callout-note collapse="true"}
+## Challenge — Close the schema hole
+A learner's `PLAN_SCHEMA` accepts an arbitrary string inside `args` (e.g.
+`"args": {"object": "the thing over there"}`), which no downstream tool can resolve. Propose one
+change that catches this before execution.
+
+### Solution
+Tighten the contract and the boundary, not the prompt alone: constrain the resolvable fields to a
+known set (e.g. an `enum` of registered landmarks/objects, or validate `args` against the live
+object list in `preconditions_ok`). An unresolvable target then fails validation/precondition checks
+and triggers a clarification request instead of a doomed tool call.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge — Why an allow-list?
+Your dispatcher rejects unknown tool names. Why is an allow-list ("only these are permitted") safer
+than a deny-list ("these are forbidden") for a robot interface?
+
+### Solution
+A deny-list fails open: any capability you forgot to forbid is implicitly allowed, so a model that
+invents a new tool name can reach behaviour you never reviewed. An allow-list fails closed —
+anything not explicitly registered is rejected, so the model's reach can never exceed the
+capabilities you deliberately exposed.
+:::
+
+::: {.callout-important}
+## Key points
+- An LM is a **translator/planner**, not a controller — it emits plans, your trusted interfaces act.
+- Demand **structured, schema-validated** output; the schema is the contract.
+- Expose capabilities via **tool calling behind an allow-list** — the model's reach is exactly what
+  you register, no more.
+- Validate and check preconditions **between model and hardware**; fail loudly at the boundary.
+- Evaluate the interface with schema-valid rate, plan accuracy, and a failure taxonomy — not demos.
+:::
+
+Next in this track: [Vision-Language Navigation (Ep 12)](ai-12-vln.qmd), which grounds these plans
+in perception to produce navigation goals. See the full
+[track map](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/curriculum/tracks/ai-world-models.md).

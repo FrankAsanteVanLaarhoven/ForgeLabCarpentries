@@ -1,0 +1,147 @@
+---
+title: "AI Episode 14 — World Models for Planning"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Explain what a **world model** is and why planning *in imagination* is useful.
+- Fit a **forward dynamics model** that predicts the next state from a state and action.
+- Plan by **imagined rollouts** — sample action sequences, score them, act on the best.
+- Evaluate the model and the planner honestly, including how prediction error compounds.
+
+**Teaching:** 45 min · **Exercises:** 30 min · **Builds on:** [Ep 13 — VLA](ai-13-vla.qmd), Foundations + Python · **Leads into:** [Ep 15 — Evaluation & Safety](ai-15-evaluation-safety.qmd)
+:::
+
+## What is a world model?
+
+A **world model** is a learned approximation of an environment's dynamics: given the current state
+and a candidate action, it predicts what happens next. With it, an agent can **plan in imagination** —
+try many action sequences *inside the model* and execute only the best one, instead of learning by
+trial and error on real hardware.
+
+```
+state sₜ ─┐
+          ├─▶ [dynamics model f] ─▶ predicted ŝₜ₊₁ ─▶ ... ─▶ ŝₜ₊ₕ   (imagined rollout)
+action aₜ ─┘                                              │
+                                          score each rollout (reward / cost)
+                                                          ▼
+                              pick the best action sequence, execute aₜ, then re-plan
+```
+
+This is the same "validated plan → trusted interface" spirit as Episode 11 — except the plan is now
+chosen by **searching over imagined futures** rather than emitted by a language model.
+
+## Step 1 — Fit a forward dynamics model
+
+Keep the model interface **framework-agnostic** — one function, swap the implementation later.
+The model learns `f(state, action) → next_state` from logged transitions:
+
+```python
+# dynamics.py — predict the next state, framework-agnostic
+def fit_dynamics(transitions) -> "Model":
+    """transitions: iterable of (state, action, next_state).
+    Returns a model with .predict(state, action) -> next_state.
+    """
+    X = [concat(s, a) for (s, a, _) in transitions]
+    Y = [s_next      for (_, _, s_next) in transitions]
+    return train_regressor(X, Y)        # your backend; report the architecture in setup
+```
+
+::: {.callout-tip}
+## Instructor note
+Have learners plot **one-step** prediction error first, before any planning. A model that can't
+predict a single step won't survive a 20-step rollout. Establishing this baseline early stops the
+class from blaming the *planner* for what is really a *model* problem.
+:::
+
+## Step 2 — Plan by imagined rollouts
+
+Given a model, planning is search over action sequences. A simple, robust choice is sampling-based
+model-predictive control: sample candidate plans, roll each forward *in the model*, keep the best:
+
+```python
+def plan(model, state, horizon=12, samples=256):
+    best_seq, best_score = None, -float("inf")
+    for _ in range(samples):
+        seq = sample_action_sequence(horizon)
+        s, total = state, 0.0
+        for a in seq:
+            s = model.predict(s, a)         # imagined step — no real-world cost
+            total += reward(s, a)
+        if total > best_score:
+            best_seq, best_score = seq, total
+    return best_seq[0]                       # execute only the first action, then re-plan
+```
+
+We return **only the first action**. Committing to a whole imagined sequence trusts the model too
+far; acting one step at a time and re-planning keeps the agent honest about model error.
+
+## Step 3 — Close the loop (model error compounds)
+
+Every predicted step feeds the next, so small errors **compound** over the horizon:
+
+```python
+state = reset_env()
+for t in range(EPISODE_LEN):
+    action = plan(model, state)             # re-plan from the real, freshly observed state
+    state  = env.step(action)               # ground truth corrects accumulated drift
+    if done(state):
+        break
+```
+
+Re-planning from the **real** observed state each step is what stops imagined drift from steering the
+robot off course. Longer horizons see further but trust a less reliable model — that trade-off is the
+heart of world-model planning.
+
+## Step 4 — Evaluate the model *and* the planner
+
+Demos lie; metrics don't. Evaluate the two halves separately so you know which one to fix:
+
+| Metric | Meaning |
+|--------|---------|
+| **One-step error** | prediction error of `f` on held-out transitions — the model's floor |
+| **H-step rollout error** | error after `H` imagined steps — shows how fast error compounds |
+| **Task success rate** | fraction of episodes the *planner* actually solves on the real env |
+| **Plan cost vs optimal** | efficiency of chosen plans against a reference, where one exists |
+
+Report rollout error **as a function of horizon**, plus a **failure taxonomy** (model error vs
+reward mis-specification vs search budget). A planner that fails with a *good* model is a search/reward
+problem; a planner that fails with a *bad* model is a data problem. The metrics tell you which.
+
+::: {.callout-note collapse="true"}
+## Challenge — Tame compounding error
+Your one-step error is tiny, but 20-step rollouts are wildly off and the planner chooses bad actions.
+Name two concrete changes that would help.
+
+### Solution
+Any two of: (1) **shorten the horizon** so fewer errors accumulate; (2) **re-plan more often** (we
+already act one step then re-plan — make sure you're not committing to long open-loop sequences);
+(3) train on **on-policy data** so the model sees states the planner actually visits; (4) add an
+**uncertainty estimate** and penalise rollouts that wander into states the model is unsure about.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge — Why execute only the first action?
+`plan()` computes a whole `horizon`-step sequence but we execute just `best_seq[0]`. Why throw the
+rest away each step?
+
+### Solution
+The later actions were chosen against *predicted* states that will drift from reality. Executing only
+the first action and re-planning from the next **real** observation closes the loop, so accumulated
+model error is corrected every step instead of being trusted blindly to the end of the horizon.
+:::
+
+::: {.callout-important}
+## Key points
+- A world model predicts dynamics so an agent can **plan in imagination** instead of on hardware.
+- Fit `f(state, action) → next_state`; **validate one-step error before you ever plan**.
+- Plan by sampling action sequences, scoring imagined rollouts, and acting on the **first** action.
+- Model error **compounds** with horizon — re-plan from real observations and report rollout error
+  vs horizon, with a failure taxonomy that separates model from planner.
+:::
+
+Next in this track: [Evaluation & Safety (Ep 15)](ai-15-evaluation-safety.qmd), which turns these
+honest-evaluation habits into a benchmark, a failure taxonomy, and guardrails. See the full
+[track map](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/curriculum/tracks/ai-world-models.md).

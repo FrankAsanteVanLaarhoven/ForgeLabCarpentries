@@ -1,0 +1,143 @@
+---
+title: "AI Episode 15 — Evaluation & Safety"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Define **task success operationally** and build a benchmark around it.
+- Construct a **failure taxonomy** that tells you *why* a system fails, not just *that* it did.
+- Add **guardrails and fallbacks** that gate actuation in a safety-critical loop.
+- Report results **honestly**, including out-of-distribution (OOD) behaviour.
+
+**Teaching:** 45 min · **Exercises:** 30 min · **Builds on:** [Ep 11](ai-11-language-models.qmd)–[Ep 14](ai-14-world-models.qmd), Foundations + Python · **Closes:** the AI & World Models track
+:::
+
+## Why this episode closes the track
+
+Every earlier episode ended with the same refrain: *demos lie; metrics don't*. This episode makes
+that the main event. A VLN agent, a VLA policy, or a world-model planner is only trustworthy if you
+can **measure when it fails** and **guarantee what it does when it does**.
+
+```
+benchmark ─▶ run agent ─▶ metrics ─▶ failure taxonomy ─▶ guardrails + fallbacks ─▶ re-test
+     ▲                                                                                │
+     └──────────────────────── in-distribution AND out-of-distribution ◀─────────────┘
+```
+
+Evaluation and safety are two sides of one coin: evaluation tells you *where* a system breaks;
+safety decides *what happens* when it does.
+
+## Step 1 — Define success operationally
+
+A loss curve is not a result. Decide, before running anything, what counts as **task success** —
+a binary, checkable predicate per episode:
+
+```python
+def task_succeeded(episode) -> bool:
+    """One unambiguous predicate per task. No partial credit, no vibes."""
+    return (
+        reached(episode.final_state, episode.goal, tol=GOAL_TOL)
+        and not episode.safety_violation
+        and episode.steps <= STEP_BUDGET
+    )
+```
+
+A predicate everyone agrees on *before* the experiment is what makes results comparable across
+runs, models, and people. Notice safety is **part of** success: a task "completed" with a safety
+violation did not succeed.
+
+::: {.callout-tip}
+## Instructor note
+Make the class write `task_succeeded` *first*, before any agent runs. Defining success after seeing
+results is how teams fool themselves. The predicate is a pre-registration of what you're claiming.
+:::
+
+## Step 2 — Build a failure taxonomy
+
+"It failed 18% of the time" is not actionable. Bucket every failure by **where in the pipeline** it
+arose — the same boundaries you built across Episodes 11–14:
+
+| Bucket | Example | Usually fixed by |
+|--------|---------|------------------|
+| **Perception / grounding** | wrong object localised | better sensing / grounding, confidence gates |
+| **Planning** | valid steps, wrong order | planner, reward, or prompt/schema |
+| **Control** | right plan, bad execution | controller tuning, recovery behaviours |
+| **Safety violation** | collision, joint limit | guardrails (Step 3) — never "tune later" |
+
+Tag each failed episode with exactly one primary bucket. The **shape** of the distribution tells you
+where to spend the next week — and a single safety-violation bucket should dominate your attention
+regardless of its count.
+
+## Step 3 — Add guardrails and fallbacks
+
+A guardrail **prevents** an unsafe action; a fallback **defines behaviour** when the system can't
+proceed safely. Put both *between* the policy and the hardware — the boundary from Episode 11:
+
+```python
+def safe_step(proposed_action, state):
+    if not within_limits(proposed_action):        # guardrail: hard actuation limits
+        return SAFE_STOP                           # fallback: brake, hold position
+    if confidence(state) < TAU:                    # guardrail: act only when sure
+        return request_help(state)                 # fallback: hand back to a human
+    if predicts_collision(proposed_action, state): # guardrail: model-based check
+        return SAFE_STOP
+    return proposed_action                         # only now does it reach actuators
+```
+
+Guardrails are an **allow-list on behaviour**: the action reaches hardware only after passing every
+check. The default on any uncertainty is a *safe* fallback — stop, hold, or ask — never "proceed and
+hope".
+
+## Step 4 — Report honestly: in-distribution *and* OOD
+
+A number without its test set is marketing. Report performance separately on what the system trained
+for and on what it didn't:
+
+| Slice | Success rate | Safety violations | Notes |
+|-------|-------------|-------------------|-------|
+| **In-distribution** | high is expected | must be 0 | the easy case; near-ceiling is not impressive |
+| **Out-of-distribution** | the real test | must be 0 | novel objects, lighting, layouts |
+| **Adversarial / edge** | stress test | must be 0 | ambiguous instructions, sensor dropout |
+
+The non-negotiable column is **safety violations**: a single one is a failure of the *system*, not a
+statistic to average away. Pair every headline success rate with the test set it was measured on and
+the failure taxonomy behind it — that triplet, not a demo, is evidence.
+
+::: {.callout-note collapse="true"}
+## Challenge — A tempting headline
+A teammate reports "94% success." What three things must you ask before you believe it tells you the
+system is ready?
+
+### Solution
+(1) **On which test set** — in-distribution, OOD, or cherry-picked? (2) **Were there any safety
+violations** in the other 6% (or even the 94%)? (3) **What's the failure taxonomy** of the failures —
+are they benign timeouts or collisions? A high average can hide unsafe behaviour; the slice, the
+safety column, and the taxonomy are what make the number meaningful.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge — Guardrail vs fallback
+Confidence drops below `TAU` mid-task. Which line is the guardrail and which is the fallback, and why
+keep them distinct?
+
+### Solution
+`confidence(state) < TAU` is the **guardrail** (it *detects* the unsafe condition);
+`request_help(state)` is the **fallback** (it *defines the safe behaviour* when the guardrail fires).
+Keeping them distinct lets you reuse one safe fallback across many guardrails and reason about
+detection and response independently.
+:::
+
+::: {.callout-important}
+## Key points
+- Define **task success as a pre-registered predicate** — with safety folded in — before running anything.
+- A **failure taxonomy** turns "it broke" into "here's the bucket to fix"; safety violations outrank counts.
+- **Guardrails prevent** unsafe actions; **fallbacks define** safe behaviour — both gate actuation.
+- Report **in-distribution and OOD** with the test set named and zero tolerance for safety violations.
+- Across the track: structure → grounding → action → imagination → **evidence**. Demos are never evidence.
+:::
+
+This closes the AI & World Models track. To put it into practice end-to-end, continue to the
+[Capstones & Certification track](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/curriculum/tracks/capstones-certification.md),
+or revisit the full [track map](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/curriculum/tracks/ai-world-models.md).

@@ -53,8 +53,11 @@ website:
           - episodes/r-15-writing-good-software.qmd
       - section: "AI & World Models"
         contents:
+          - episodes/ai-11-language-models.qmd
           - episodes/ai-12-vln.qmd
           - episodes/ai-13-vla.qmd
+          - episodes/ai-14-world-models.qmd
+          - episodes/ai-15-evaluation-safety.qmd
   page-footer:
     center: "Content CC-BY 4.0 · Code MIT · ForgeLab Carpentries"
 
