@@ -2,16 +2,6 @@
 title: "Opportunities"
 ---
 
-<!--
-TODO (placements portal URL): the public portal is not deployed yet.
-Intended target (local dev):  http://localhost:3006/jobs
-When the Vercel production deployment is live, replace the "launching soon"
-line below with a real link, e.g.:
-    [**Browse open opportunities →**](https://<portal-domain>/jobs)
-This is the single place to update — the navbar item and every workshop
-landing page already point here.
--->
-
 ForgeLab Carpentries isn't only about learning — it's a pathway from skills to real work.
 
 ## From workshops to opportunities
@@ -28,9 +18,11 @@ to concrete openings, so your learning leads somewhere.
 
 ## Browse the portal
 
-🚧 **The placements portal is launching soon.** Once it's live, this page will link straight to the
-open roles. In the meantime, talk to your instructors about upcoming placements and how to get your
-capstone work ready to showcase.
+[**Browse open opportunities →**](https://forge-lab-platform-portal.vercel.app/jobs)
+
+The portal lists open roles in robotics, autonomy, and AI and matches them to the tracks, capstones,
+and credentials you've completed here. Talk to your instructors about getting your capstone work
+ready to showcase.
 
 ## For instructors & partners
 
