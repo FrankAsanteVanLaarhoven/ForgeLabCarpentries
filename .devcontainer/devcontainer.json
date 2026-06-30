@@ -1,0 +1,32 @@
+{
+  "name": "ForgeLab Carpentries",
+  "image": "osrf/ros:jazzy-desktop",
+  "features": {
+    "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {
+      "version": "latest",
+      "installTinyTex": false
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/desktop-lite:1": {}
+  },
+  "containerEnv": {
+    "QUARTO_PYTHON": "/opt/venv/bin/python",
+    "ROS_DISTRO": "jazzy",
+    "DISPLAY": ":1"
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": { "label": "Desktop (noVNC)", "onAutoForward": "openBrowserOnce" }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "quarto.quarto",
+        "ms-python.python",
+        "ms-iot.vscode-ros"
+      ]
+    }
+  },
+  "remoteUser": "root"
+}

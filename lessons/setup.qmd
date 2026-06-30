@@ -73,6 +73,14 @@ docker run -it --rm ros:jazzy bash
 Native install instructions: <https://docs.ros.org/en/jazzy/Installation.html>.
 Your instructor will confirm which option the workshop uses.
 
+::: {.callout-tip}
+## Easiest of all: the Codespace
+The repository ships a dev container with ROS 2 Jazzy, Quarto, and Python preinstalled, plus a
+browser desktop (noVNC) so GUI tools like `turtlesim` and `rviz2` work in the cloud. Open it via
+**Code ▸ Codespaces** on GitHub — no local ROS install needed. Details:
+[`.devcontainer/README.md`](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/.devcontainer/README.md).
+:::
+
 ## 5. A GitHub account
 
 Create one free at <https://github.com/join> if you don't have one — we use it for
