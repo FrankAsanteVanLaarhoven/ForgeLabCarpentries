@@ -126,4 +126,4 @@ If you already staged it: `git restore --staged nav.yaml` first, then `git resto
 - The fork/PR workflow is how teams collaborate and how CI gets triggered.
 :::
 
-Next: [Episode 3 — Robot navigation with ROS 2](03-ros2-navigation.qmd).
+Next: [Foundations Episode 3 — Bash scripting & automation](f-03-bash-scripting.qmd).

@@ -84,6 +84,7 @@ Verify: `git --version && python3 --version`
 - Complete the post-survey.
 - Join the community channel.
 - Watch for the 3–6 month follow-up survey.
+- Explore **Opportunities** (`<lesson site>/opportunities`) — turn your verified skills into real roles via the placements portal.
 - Consider becoming a [helper or instructor](../../instructors/).
 
 ## Code of Conduct

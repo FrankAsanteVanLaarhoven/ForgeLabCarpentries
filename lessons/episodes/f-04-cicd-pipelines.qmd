@@ -1,0 +1,119 @@
+---
+title: "Foundations Episode 4 — CI/CD Pipelines (GitHub Actions)"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Explain what CI/CD is and why it catches problems before your teammates do.
+- Read and write a GitHub Actions workflow (triggers → jobs → steps).
+- Run tests automatically on every push and pull request.
+- Build and publish an artifact when the checks pass.
+
+**Teaching:** 45 min · **Exercises:** 30 min
+:::
+
+## Why CI/CD?
+
+"It works on my machine" is where bugs go to hide. **Continuous Integration** runs your tests on a
+clean machine every time anyone pushes, so a broken change is caught in minutes — not after it's
+merged into the robot's control stack. **Continuous Delivery** takes the next step: when the checks
+pass, it automatically builds and ships the artifact (a package, a container, this very lesson site).
+
+This repository already does both — `.github/workflows/` renders and deploys the site you're reading.
+By the end of this episode you'll understand exactly how.
+
+## Anatomy of a workflow
+
+A workflow is a YAML file in `.github/workflows/`. Three concepts: **when** it runs (`on`), **what**
+runs (`jobs`), and the ordered **steps** inside each job:
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+on:                      # WHEN: triggers
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:                  # WHAT: a job runs on a fresh VM
+    runs-on: ubuntu-latest
+    steps:               # ordered steps
+      - uses: actions/checkout@v4          # get the code
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - run: pytest -q                     # the gate: fails the build if tests fail
+```
+
+::: {.callout-tip}
+## Instructor note
+Open this repo's real `.github/workflows/ci.yml` side by side. Learners trust CI more once they see
+it's not magic — it's the same commands they'd run locally, executed on a clean machine. Point out
+the `Render (fails the build on errors)` step: that one line is the entire quality gate.
+:::
+
+## The build fails when a test fails
+
+The point of the `pytest` step is that a red test turns the whole run red and blocks the merge:
+
+```bash
+# a failing test locally → the same failure in CI
+pytest -q
+# FAILED test_nav.py::test_speed_limit - assert 2.0 <= 1.5
+# (exit code 1 → the CI step fails → the PR is blocked)
+```
+
+A failing step exits non-zero, GitHub marks the run failed, and branch protection can stop the merge.
+That is the safety net: nobody can merge a change that breaks the tests.
+
+## From integration to delivery
+
+Once the checks are green, a second job can **build and publish** an artifact — gated on the first:
+
+```yaml
+  deploy:
+    needs: test            # only runs if `test` passed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./build.sh                    # produce the artifact
+      - uses: actions/upload-artifact@v4   # or deploy: Pages, a registry, a release
+        with: { name: site, path: _site }
+```
+
+`needs: test` is the link between CI and CD: delivery only happens *after* integration passes, so you
+never ship a build that failed its tests.
+
+::: {.callout-note collapse="true"}
+## Challenge 1 — When does it run?
+Given the `on:` block above, will the workflow run when you (a) push to `main`, (b) open a pull
+request, (c) push to a branch called `experiment` with no PR open?
+
+### Solution
+(a) Yes — `push` to `main`. (b) Yes — `pull_request`. (c) No — pushing to `experiment` without a PR
+matches neither trigger. Add `experiment` to `push.branches`, or open a PR, to make it run.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge 2 — Why `needs: test`?
+What happens to the `deploy` job if a test in the `test` job fails, and why is that the behaviour you
+want?
+
+### Solution
+`deploy` is skipped — `needs: test` means it only runs if `test` succeeded. You want this because
+delivery should never ship an artifact built from code that failed its tests; the dependency makes
+"tests pass" a precondition for "publish".
+:::
+
+::: {.callout-important}
+## Key points
+- CI runs your tests on a clean machine on every push/PR — it kills "works on my machine".
+- A workflow is `on` (when) → `jobs` (what) → `steps` (ordered actions), written as YAML.
+- A failing step fails the run and can block the merge — that's the safety net.
+- `needs:` chains delivery onto integration: ship the artifact only after the tests pass.
+:::
+
+Next: [Foundations Episode 5 — Reproducible Environments](f-05-reproducible-environments.qmd).

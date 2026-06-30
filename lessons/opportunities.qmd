@@ -1,0 +1,39 @@
+---
+title: "Opportunities"
+---
+
+<!--
+TODO (placements portal URL): the public portal is not deployed yet.
+Intended target (local dev):  http://localhost:3006/jobs
+When the Vercel production deployment is live, replace the "launching soon"
+line below with a real link, e.g.:
+    [**Browse open opportunities →**](https://<portal-domain>/jobs)
+This is the single place to update — the navbar item and every workshop
+landing page already point here.
+-->
+
+ForgeLab Carpentries isn't only about learning — it's a pathway from skills to real work.
+
+## From workshops to opportunities
+
+The journey is deliberate:
+
+1. **Learn** — complete hands-on workshops across Foundations, Robotics, and Applied AI.
+2. **Verify** — earn micro-credentials through instructor checkout and capstone projects.
+3. **Connect** — surface those verified skills to teams hiring for robotics, autonomy, and AI roles
+   through the **placements portal**.
+
+The portal matches the evidence you build here — completed tracks, capstones, and credentials —
+to concrete openings, so your learning leads somewhere.
+
+## Browse the portal
+
+🚧 **The placements portal is launching soon.** Once it's live, this page will link straight to the
+open roles. In the meantime, talk to your instructors about upcoming placements and how to get your
+capstone work ready to showcase.
+
+## For instructors & partners
+
+If your team is hiring and wants to source from ForgeLab graduates, or you'd like to contribute a
+capstone brief tied to a real role, see the
+[Capstones & Certification track](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/curriculum/tracks/capstones-certification.md).

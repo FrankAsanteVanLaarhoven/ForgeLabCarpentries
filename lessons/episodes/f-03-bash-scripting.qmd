@@ -1,0 +1,125 @@
+---
+title: "Foundations Episode 3 — Bash Scripting & Automation"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Turn a sequence of commands into a reusable, executable script.
+- Make scripts fail safely with `set -euo pipefail` and proper quoting.
+- Accept arguments, loop over files, and factor logic into functions.
+- Automate a repetitive robotics chore end-to-end.
+
+**Teaching:** 40 min · **Exercises:** 30 min
+:::
+
+## Why scripting?
+
+You ran the same three commands to process yesterday's sensor logs. And today's. And you'll run
+them tomorrow. A **script** captures that workflow once so it runs identically every time — no
+forgotten step, no typo at 2 a.m. before a demo. Scripting is where the shell stops being a
+calculator and becomes automation.
+
+## From commands to a script
+
+A script is just commands in a file with a **shebang** telling the OS how to run it:
+
+```bash
+cat > process_logs.sh <<'EOF'
+#!/usr/bin/env bash
+echo "Processing logs in $(pwd)"
+ls *.log
+EOF
+chmod +x process_logs.sh        # make it executable
+./process_logs.sh
+```
+
+The `#!/usr/bin/env bash` line is what lets you run `./process_logs.sh` instead of `bash process_logs.sh`.
+
+## Make it robust: `set -euo pipefail`
+
+The single most important line in any production script:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+#  -e  exit on any command failure
+#  -u  error on unset variables (catches typos)
+#  -o pipefail  a pipeline fails if *any* stage fails, not just the last
+```
+
+::: {.callout-tip}
+## Instructor note
+Demonstrate the failure mode live: write a script *without* `set -euo pipefail` that `cd`s into a
+missing directory and then deletes files. Show how it charges ahead and does damage. Then add the
+line and watch it stop at the first error. The contrast is what makes the lesson stick.
+:::
+
+## Arguments
+
+Hard-coded paths don't scale. Take input as arguments:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+log_dir="${1:?usage: process_logs.sh <log_dir>}"   # :? prints usage and exits if missing
+echo "Processing logs in: $log_dir"
+```
+
+Always **quote** variables (`"$log_dir"`) — an unquoted path with a space silently breaks into two arguments.
+
+## Loops and functions
+
+Batch-process every log, with the work factored into a function:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+log_dir="${1:?usage: process_logs.sh <log_dir>}"
+
+summarize() {                      # function: one job, reusable
+    local file="$1"
+    local lines; lines=$(wc -l < "$file")
+    echo "$file: $lines lines"
+}
+
+for f in "$log_dir"/*.log; do      # quote the glob target
+    [ -e "$f" ] || { echo "no .log files found"; exit 0; }   # handle the empty case
+    summarize "$f"
+done
+```
+
+This is a real automation: point it at any directory and it reports every log, the same way every time.
+
+::: {.callout-note collapse="true"}
+## Challenge 1 — Why `set -euo pipefail`?
+A teammate's backup script `cd "$dest" && rm -rf ./*` ran with `$dest` unset and wiped the wrong
+directory. Which flag would have prevented it, and why?
+
+### Solution
+`set -u` (error on unset variables). With `$dest` unset, `cd "$dest"` would have errored and — with
+`set -e` — the script would have exited *before* the `rm`. Unset-variable protection turns a silent,
+destructive typo into a safe, loud failure.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge 2 — Make it handle no matches
+If `"$log_dir"` contains no `.log` files, what does the `for` loop do by default, and how does the
+guard above fix it?
+
+### Solution
+By default the glob `*.log` expands to the literal string `*.log` when nothing matches, so the loop
+runs once with a non-existent filename. The `[ -e "$f" ] || { ...; exit 0; }` guard detects that the
+first "file" doesn't exist and exits cleanly instead of processing a bogus path.
+:::
+
+::: {.callout-important}
+## Key points
+- A script captures a workflow once so it runs identically every time.
+- Start every script with `set -euo pipefail` — fail fast, fail loud, fail safe.
+- Take input as **quoted** arguments; never hard-code paths.
+- Loops automate the repetitive part; functions keep the logic reusable and readable.
+:::
+
+Next: [Foundations Episode 4 — CI/CD Pipelines](f-04-cicd-pipelines.qmd).

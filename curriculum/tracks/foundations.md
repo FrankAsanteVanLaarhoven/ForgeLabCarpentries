@@ -10,9 +10,9 @@
 |---|---------|---------------------------|--------|
 | 1 | The Unix Shell for Roboticists | navigate FS, manipulate files, pipe data, write a Bash script | live |
 | 2 | Version Control with Git | commit, branch, read history, collaborate via PRs | live |
-| 3 | Bash Scripting & Automation | write robust scripts (`set -euo pipefail`), args, loops, functions | planned |
-| 4 | CI/CD Pipelines (GitHub Actions) | write a workflow, run tests on push, build/deploy artifacts | planned |
-| 5 | Reproducible Environments | virtual envs, containers, lockfiles; "works on my machine" → "works everywhere" | planned |
+| 3 | Bash Scripting & Automation | write robust scripts (`set -euo pipefail`), args, loops, functions | live |
+| 4 | CI/CD Pipelines (GitHub Actions) | write a workflow, run tests on push, build/deploy artifacts | live |
+| 5 | Reproducible Environments | virtual envs, containers, lockfiles; "works on my machine" → "works everywhere" | live |
 
 ## Design notes
 

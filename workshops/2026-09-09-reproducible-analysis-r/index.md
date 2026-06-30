@@ -108,6 +108,7 @@ for self-study.)*
 - Complete the post-survey (link above).
 - Join the Discord community channel.
 - Watch for the 3–6 month follow-up survey (we measure real-world impact).
+- Explore **[Opportunities](https://frankasantevanlaarhoven.github.io/ForgeLabCarpentries/opportunities.html)** — turn your verified skills into real roles via the placements portal.
 - Consider a [Capstone](../../curriculum/tracks/capstones-certification.md) — e.g. a reproducible
   analysis report — to earn a micro-credential, or
   [become a helper/instructor](../../instructors/).

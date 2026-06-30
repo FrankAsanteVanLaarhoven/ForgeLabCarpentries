@@ -93,6 +93,7 @@ Verify: `git --version && python3 --version && echo "Core setup OK"`
 - Complete the post-survey (link above).
 - Join the Discord community channel.
 - Watch for the 3–6 month follow-up survey (we measure real-world impact).
+- Explore **[Opportunities](https://frankasantevanlaarhoven.github.io/ForgeLabCarpentries/opportunities.html)** — turn your verified skills into real roles via the placements portal.
 - Consider the [Robotics & Autonomy](../../curriculum/tracks/robotics-autonomy.md) track next,
   or [becoming a helper/instructor](../../instructors/).
 

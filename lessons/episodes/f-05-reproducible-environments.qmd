@@ -1,0 +1,116 @@
+---
+title: "Foundations Episode 5 — Reproducible Environments"
+---
+
+::: {.callout-note}
+## Objectives
+By the end of this episode you will be able to:
+
+- Explain why "works on my machine" is a bug, not a defence.
+- Isolate dependencies with a virtual environment.
+- Pin exact versions with a lockfile so a build is repeatable.
+- Capture a whole environment in a container and a dev container.
+
+**Teaching:** 45 min · **Exercises:** 30 min
+:::
+
+## Why reproducibility?
+
+A result you can't reproduce isn't a result, and a robot stack that only runs on *your* laptop can't
+be deployed. The enemy is hidden state: a package version that drifted, a system library that happens
+to be installed, an environment variable only you have. Reproducibility means anyone — a teammate, a
+CI runner, a robot — gets the **same** environment from the **same** declaration. This is the muscle
+that CI/CD (Episode 4) and the whole Cloud track depend on.
+
+## Virtual environments — isolate dependencies
+
+Never install project packages into the system Python. Create an isolated environment per project:
+
+```bash
+python3 -m venv .venv          # create
+source .venv/bin/activate      # activate (your shell prompt changes)
+pip install numpy matplotlib
+deactivate                     # leave it
+```
+
+Now this project's packages can't collide with another project's — or with the OS.
+
+## Pin exact versions — the lockfile
+
+"Install numpy" is not reproducible: next month "numpy" is a different version. **Pin** what you
+actually used so the next person gets exactly that:
+
+```bash
+pip freeze > requirements.txt      # record EXACT versions
+# numpy==1.26.4
+# matplotlib==3.8.2
+pip install -r requirements.txt    # anyone reproduces your environment
+```
+
+::: {.callout-tip}
+## Instructor note
+Show the difference between `numpy` and `numpy==1.26.4` in a `requirements.txt`. Ask the class what
+happens to a six-month-old experiment when the unpinned version silently major-bumps. Pinning is the
+cheapest reproducibility win there is — make them feel why before moving to containers.
+:::
+
+## Containers — capture the whole machine
+
+A virtual environment pins Python packages; a **container** pins the operating system, system
+libraries, and tools too. You declare the environment in a `Dockerfile`:
+
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt    # reproducible: same lockfile, same image
+COPY . .
+CMD ["python", "robot_node.py"]
+```
+
+```bash
+docker build -t robot-node .
+docker run --rm robot-node             # runs identically on any machine with Docker
+```
+
+The image *is* the environment — the same bits run on your laptop, a CI runner, and the robot.
+
+## Dev containers — reproducibility for development too
+
+A **dev container** applies the same idea to your editor: everyone opens the project in an identical,
+pre-provisioned environment. This repository ships one — see
+[`.devcontainer/`](https://github.com/FrankAsanteVanLaarhoven/ForgeLabCarpentries/blob/main/.devcontainer/README.md),
+which gives every contributor ROS 2 + Quarto with no "install these 14 things first" page.
+
+::: {.callout-note collapse="true"}
+## Challenge 1 — Why pin versions?
+Your analysis ran fine in January with `requirements.txt` containing just `pandas`. In June the same
+command errors out. What most likely changed, and what one edit prevents it?
+
+### Solution
+`pandas` released a new version between January and June, and an unpinned `pip install` pulled the
+newer, behaviour-changed release. Pinning the exact version (`pandas==2.1.4`) — ideally via
+`pip freeze` — locks the environment so June reproduces January.
+:::
+
+::: {.callout-note collapse="true"}
+## Challenge 2 — venv or container?
+A collaborator can reproduce your Python packages but still gets different results because they're on
+a different OS with a different system library. Which tool fixes this, and why?
+
+### Solution
+A **container**. A virtual environment only isolates Python packages; it inherits the host OS and
+system libraries. A container captures the OS and system dependencies too, so the *whole* environment
+— not just the Python layer — is identical across machines.
+:::
+
+::: {.callout-important}
+## Key points
+- "Works on my machine" is hidden state — reproducibility removes it.
+- Use a **virtual environment** to isolate a project's Python packages.
+- **Pin exact versions** in a lockfile so a build repeats months later.
+- **Containers** capture the whole machine; **dev containers** do the same for development.
+:::
+
+This completes the Foundations track. Next, apply these habits in the Robotics track:
+[Episode 3 — Robot Navigation with ROS 2](03-ros2-navigation.qmd).

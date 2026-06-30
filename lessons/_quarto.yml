@@ -20,6 +20,8 @@ website:
         file: setup.qmd
       - text: "Reference"
         file: reference.qmd
+      - text: "Opportunities"
+        file: opportunities.qmd
       - text: "Instructor Notes"
         file: instructor-notes.qmd
     right:
@@ -33,6 +35,9 @@ website:
         contents:
           - episodes/01-intro-unix-shell.qmd
           - episodes/02-git-version-control.qmd
+          - episodes/f-03-bash-scripting.qmd
+          - episodes/f-04-cicd-pipelines.qmd
+          - episodes/f-05-reproducible-environments.qmd
           - episodes/03-ros2-navigation.qmd
       - section: "R for Reproducible Science"
         contents:
