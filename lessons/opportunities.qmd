@@ -11,10 +11,31 @@ The journey is deliberate:
 1. **Learn** — complete hands-on workshops across Foundations, Robotics, and Applied AI.
 2. **Verify** — earn micro-credentials through instructor checkout and capstone projects.
 3. **Connect** — surface those verified skills to teams hiring for robotics, autonomy, and AI roles
-   through the **placements portal**.
+   through the **[placements portal](https://forge-lab-platform-portal.vercel.app)**.
 
 The portal matches the evidence you build here — completed tracks, capstones, and credentials —
 to concrete openings, so your learning leads somewhere.
+
+## On the placements portal
+
+The [placements portal](https://forge-lab-platform-portal.vercel.app) is live. Three steps take you
+from workshops to offers:
+
+1. **Build your profile** — [sign in](https://forge-lab-platform-portal.vercel.app/login) and add your
+   details. Workshops you complete here appear as a **verified graduate badge** on your
+   [profile](https://forge-lab-platform-portal.vercel.app/profile).
+2. **Confirm your Right to Work** — declare your status and add your Home Office **share code** on the
+   [Right to Work](https://forge-lab-platform-portal.vercel.app/profile/right-to-work) page, then submit
+   it for review. Our team verifies it and you can see the outcome on your profile.
+   *Share code only — we never store passport or visa scans.*
+3. **Apply with confidence** — [browse open roles](https://forge-lab-platform-portal.vercel.app/jobs) in
+   robotics, autonomy, and AI and apply directly to hiring teams.
+
+::: {.callout-note}
+You can browse and apply to roles without an account. Signing in adds a profile, your verified
+graduate badge, and Right to Work confirmation — which help hiring teams move faster. We store only a
+Home Office share code (kept 90 days after verification), never document scans.
+:::
 
 ## Browse the portal
 
